@@ -11,6 +11,15 @@ foreground_color = (1,1,1)
 foreground_color = (0,0,0)
 background_color = (1,1,1)
 
+system_font = "DejaVu Sans"
+# system_font = "DejaVu Serif"
+# system_font = "Inconsolata"
+# system_font = "Arial"
+# system_font = "Segoe UI"
+system_font = "Calibri"
+# system_font = "Corbel"
+# system_font = "Candara"
+
 # Create a GTK+ widget on which we will draw using Cairo
 class Screen(gtk.DrawingArea):
     # Draw in response to an expose-event
@@ -22,6 +31,8 @@ class Screen(gtk.DrawingArea):
         self.stop_watch = False
         self.stop_watch_start_time  = None
         self.stop_watch_stop_time  = None
+
+        self.world = cairo.ImageSurface.create_from_png("world.png")
 
     # Handle the expose-event by drawing
     def do_expose_event(self, event):
@@ -46,20 +57,21 @@ class Screen(gtk.DrawingArea):
         time    = now.strftime("%H:%M")
         seconds = now.strftime("%S")       
 
-        cr.select_font_face("DejaVu Sans",
+        cr.select_font_face(system_font,
                 cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
 
         cr.set_source_rgb(*foreground_color)
 
         cr.set_font_size(192)
-        cr.move_to(32, 750)
+        cr.move_to(32, 770)
         cr.show_text(time)
+        xbearing, ybearing, width, height, xadvance, yadvance = cr.text_extents(time)
 
-        cr.set_font_size(192/2)
-        cr.move_to(600, 750)
+        cr.set_font_size(192 * 0.6)
+        cr.move_to(32 + width + 32, 770)
         cr.show_text(seconds)
 
-        cr.set_font_size(64)
+        cr.set_font_size(56)
         cr.move_to(32, 840)
         cr.show_text(weekday)
 
@@ -74,7 +86,7 @@ class Screen(gtk.DrawingArea):
             time    = "%02d:%02d" % (t.seconds/60, t.seconds%60)
             seconds = "%02d" % (t.microseconds/10000)
 
-            cr.select_font_face("DejaVu Sans",
+            cr.select_font_face(system_font,
                     cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
 
             cr.set_source_rgb(*foreground_color)
@@ -91,38 +103,46 @@ class Screen(gtk.DrawingArea):
             cr.move_to(315, 150)
             cr.show_text(seconds)
         else:
-            self.draw_calender(cr, now, 64, 64)
+            self.draw_calender(cr, now, 80, 100)
+            
+        
+        cr.set_source_surface(self.world, 
+                              1200 - self.world.get_width()  - 16, 
+                              900  - self.world.get_height() - 32)
+        cr.paint_with_alpha(0.125)
 
     def draw_calender(self, cr, now, x_pos, y_pos):
-        cr.select_font_face("DejaVu Sans",
+        cr.select_font_face(system_font,
                             cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+
+        cell_width  = 75
+        cell_height = 60
 
         cr.set_source_rgb(0.75,0.75,0.75)
         cr.set_font_size(48)
         s = now.strftime("%B %Y")
         xbearing, ybearing, width, height, xadvance, yadvance = cr.text_extents(s)
-
-        cr.move_to(232 - width/2, 64)
+        cr.move_to(x_pos + 232 - width/2, y_pos - 16)
         cr.show_text(s)
 
         cr.set_source_rgb(*foreground_color)
-        cr.set_font_size(24)
+        cr.set_font_size(32)
         days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
         for x in range(0,7):
                 xbearing, ybearing, width, height, xadvance, yadvance = cr.text_extents(days[x])
-                cr.move_to(48  + x * 64 - width/2, 
-                           120 + 0 * 48)
+                cr.move_to(x_pos + x * cell_width - width/2, 
+                           y_pos + 32 + 0 * cell_height)
                 cr.show_text(days[x])
             
-        cr.move_to(28, 134)
-        cr.line_to(460, 134)
+        cr.move_to(x_pos - cell_width/2,   y_pos + height*2)
+        cr.line_to(x_pos + cell_width * 6.5, y_pos + height*2)
         cr.stroke()
 
         start = datetime(now.year, now.month, 1)
         start = start - timedelta(start.weekday())
         today = start
 
-        cr.select_font_face("DejaVu Sans",
+        cr.select_font_face(system_font,
                             cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
 
         for y in range(0,6):
@@ -133,22 +153,25 @@ class Screen(gtk.DrawingArea):
                     cr.set_source_rgb(0.75, 0.75, 0.75)
                 else:
                     if today.day == now.day and today.month == now.month:
-                        cr.set_source_rgb(*foreground_color)
-                        cr.rectangle(48  + x * 64 - 32, 
-                                     168 + y * 48 - 32, 64, 48)
+                        # cr.set_source_rgb(*foreground_color)
+                        cr.set_source_rgb(0.9, 0.9, 0.9)
+                        cr.rectangle(x_pos + x * cell_width - cell_width/2, 
+                                     y_pos + 32 + cell_height + y * cell_height - cell_height/2 - 10, 
+                                     cell_width, cell_height)
                         cr.fill()
-                        cr.set_source_rgb(*background_color)
-                        cr.select_font_face("DejaVu Sans",
-                                            cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_BOLD)
+                        # cr.set_source_rgb(*background_color)
+                        cr.set_source_rgb(*foreground_color)
+                        cr.select_font_face(system_font,
+                                            cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
                     else:
-                        cr.select_font_face("DejaVu Sans",
+                        cr.select_font_face(system_font,
                                             cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
                         cr.set_source_rgb(*foreground_color)
 
                 xbearing, ybearing, width, height, xadvance, yadvance = cr.text_extents(s)
 
-                cr.move_to(48  + x * 64 - width/2, 
-                           168 + y * 48)
+                cr.move_to(x_pos + x * cell_width - width/2, 
+                           y_pos + 32 + cell_height + y * cell_height)
                 # now.day, now.month
                 # now.weekday()
                 cr.show_text(s)
