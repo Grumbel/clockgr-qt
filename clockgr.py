@@ -1,4 +1,21 @@
 #! /usr/bin/env python
+##
+##  clockgr - A fullscreen clock for Gtk+
+##  Copyright (C) 2012 Ingo Ruhnke <grumbel@gmail.com>
+##
+##  This program is free software: you can redistribute it and/or modify
+##  it under the terms of the GNU General Public License as published by
+##  the Free Software Foundation, either version 3 of the License, or
+##  (at your option) any later version.
+##
+##  This program is distributed in the hope that it will be useful,
+##  but WITHOUT ANY WARRANTY; without even the implied warranty of
+##  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##  GNU General Public License for more details.
+##
+##  You should have received a copy of the GNU General Public License
+##  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import pygtk
 import math
 from datetime import datetime, timedelta
@@ -31,12 +48,13 @@ class Screen(gtk.DrawingArea):
         self.stop_watch = False
         self.stop_watch_start_time  = None
         self.stop_watch_stop_time  = None
+        
+        self.calendar_offset = 0
 
         self.world = cairo.ImageSurface.create_from_png("world.png")
 
     # Handle the expose-event by drawing
     def do_expose_event(self, event):
-
         # Create the cairo context
         cr = self.window.cairo_create()
 
@@ -53,9 +71,28 @@ class Screen(gtk.DrawingArea):
         cr.fill()
 
         now = datetime.now()
-        weekday = now.strftime("%A, %d. %B %Y")
+
+        self.draw_digital(cr, now)
+
+        self.draw_analog(cr, now, 900, 300, 256, 256)
+
+        if self.stop_watch_start_time:
+            self.draw_stopwatch(cr, now)
+        else:
+            self.draw_calender(cr, now, 80, 100)
+        
+        self.draw_world(cr)
+
+    def draw_world(self, cr):
+        cr.set_source_surface(self.world, 
+                              1200 - self.world.get_width()  - 16, 
+                              900  - self.world.get_height() - 32)
+        cr.paint_with_alpha(0.125)
+
+    def draw_digital(self, cr, now):
+        date    = now.strftime("%A, %d. %B %Y")
         time    = now.strftime("%H:%M")
-        seconds = now.strftime("%S")       
+        seconds = now.strftime("%S")
 
         cr.select_font_face(system_font,
                 cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
@@ -73,43 +110,35 @@ class Screen(gtk.DrawingArea):
 
         cr.set_font_size(56)
         cr.move_to(32, 840)
-        cr.show_text(weekday)
+        cr.show_text(date)       
 
-        self.draw_analog(cr, now, 900, 300, 256, 256)
-
-        if self.stop_watch_start_time:
-            if self.stop_watch_stop_time:
-                t = self.stop_watch_stop_time - self.stop_watch_start_time
-            else:
-                t = now - self.stop_watch_start_time
-
-            time    = "%02d:%02d" % (t.seconds/60, t.seconds%60)
-            seconds = "%02d" % (t.microseconds/10000)
-
-            cr.select_font_face(system_font,
-                    cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
-
-            cr.set_source_rgb(*foreground_color)
-
-            cr.set_font_size(24)
-            cr.move_to(32, 64)
-            cr.show_text("Stopwatch:")
-
-            cr.set_font_size(192/2)
-            cr.move_to(32, 150)
-            cr.show_text(time)
-
-            cr.set_font_size(192/4)
-            cr.move_to(315, 150)
-            cr.show_text(seconds)
+    def draw_stopwatch(self, cr, now):
+        if self.stop_watch_stop_time:
+            t = self.stop_watch_stop_time - self.stop_watch_start_time
         else:
-            self.draw_calender(cr, now, 80, 100)
-            
-        
-        cr.set_source_surface(self.world, 
-                              1200 - self.world.get_width()  - 16, 
-                              900  - self.world.get_height() - 32)
-        cr.paint_with_alpha(0.125)
+            t = now - self.stop_watch_start_time
+
+        time    = "%02d:%02d" % (t.seconds/(60*60), (t.seconds%(60*60))/60)
+        seconds = "%02d'%02d" % (t.seconds%60, t.microseconds/10000)
+
+        cr.select_font_face(system_font,
+                            cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+
+        cr.set_source_rgb(*foreground_color)
+
+        cr.set_font_size(24)
+        cr.move_to(32, 64)
+        cr.show_text("Stopwatch:")
+
+        cr.set_font_size(192/2)
+        cr.move_to(32, 150)
+        cr.show_text(time)
+
+        xbearing, ybearing, width, height, xadvance, yadvance = cr.text_extents(time)
+
+        cr.set_font_size(192/2 * 0.6)
+        cr.move_to(32 + width + 16, 150)
+        cr.show_text(seconds)        
 
     def draw_calender(self, cr, now, x_pos, y_pos):
         cr.select_font_face(system_font,
@@ -118,9 +147,25 @@ class Screen(gtk.DrawingArea):
         cell_width  = 75
         cell_height = 60
 
+        year  = now.year
+        month = now.month
+        month += self.calendar_offset
+
+        while month < 1:
+            year  -= 1
+            month += 12
+
+        while month > 12:
+            year  += 1
+            month -= 12
+
+        start = datetime(year, month, 1)
+        start = start - timedelta(start.weekday())
+        today = start
+
         cr.set_source_rgb(0.75,0.75,0.75)
         cr.set_font_size(48)
-        s = now.strftime("%B %Y")
+        s = datetime(year, month, 1).strftime("%B %Y")
         xbearing, ybearing, width, height, xadvance, yadvance = cr.text_extents(s)
         cr.move_to(x_pos + 232 - width/2, y_pos - 16)
         cr.show_text(s)
@@ -138,10 +183,6 @@ class Screen(gtk.DrawingArea):
         cr.line_to(x_pos + cell_width * 6.5, y_pos + height*2)
         cr.stroke()
 
-        start = datetime(now.year, now.month, 1)
-        start = start - timedelta(start.weekday())
-        today = start
-
         cr.select_font_face(system_font,
                             cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
 
@@ -149,10 +190,10 @@ class Screen(gtk.DrawingArea):
             for x in range(0,7):
                 s = "%d" % today.day
                                 
-                if today.month != now.month:
+                if today.month != month:
                     cr.set_source_rgb(0.75, 0.75, 0.75)
                 else:
-                    if today.day == now.day and today.month == now.month:
+                    if today.day == now.day and today.month == now.month and self.calendar_offset == 0:
                         # cr.set_source_rgb(*foreground_color)
                         cr.set_source_rgb(0.9, 0.9, 0.9)
                         cr.rectangle(x_pos + x * cell_width - cell_width/2, 
@@ -196,7 +237,7 @@ class Screen(gtk.DrawingArea):
                        y + math.sin(angle)*width*0.95)
         cr.stroke()
 
-        cr.set_source_rgb(0, 0, 0)
+        cr.set_source_rgb(*foreground_color)
         cr.set_line_width(6.0)
         cr.set_line_cap(cairo.LINE_CAP_ROUND)
         cr.new_path()
@@ -215,7 +256,7 @@ class Screen(gtk.DrawingArea):
         # hour
         cr.set_source_rgb(*foreground_color)
         cr.new_path()
-        cr.set_line_width(14.0)
+        cr.set_line_width(16.0)
         cr.set_line_cap(cairo.LINE_CAP_ROUND)
         cr.move_to(x + math.cos(hour)*width*0.0,
                    y + math.sin(hour)*width*0.0)
@@ -226,7 +267,7 @@ class Screen(gtk.DrawingArea):
         # minute
         cr.set_source_rgb(*foreground_color)
         cr.new_path()
-        cr.set_line_width(14.0)
+        cr.set_line_width(12.0)
         cr.set_line_cap(cairo.LINE_CAP_ROUND)
         cr.move_to(x + math.cos(minute)*width*0.0,
                    y + math.sin(minute)*width*0.0)
@@ -251,11 +292,12 @@ class Screen(gtk.DrawingArea):
         cr.fill()
 
     def update(self):
-        self.queue_draw()
+        if not self.stop_watch:
+            self.queue_draw()
         return True
 
     def update_fast(self):
-        self.queue_draw_area(0,0,400,180)
+        self.queue_draw_area(0,0,500,180)
         if self.stop_watch:
             return True
         else:
@@ -263,6 +305,7 @@ class Screen(gtk.DrawingArea):
 
     def start_stop_watch(self):
         if self.stop_watch:
+            self.update_fast()
             self.stop_watch = False            
             self.stop_watch_stop_time = datetime.now()
         else:
@@ -273,14 +316,22 @@ class Screen(gtk.DrawingArea):
                 self.stop_watch_start_time = datetime.now() - (self.stop_watch_stop_time - self.stop_watch_start_time)
                 self.stop_watch_stop_time  = None
             gobject.timeout_add(31, self.update_fast)
-
-        self.queue_draw_area(0,0,400,180)
+            self.queue_draw()
 
     def clear_stop_watch(self):
         self.queue_draw()
         self.stop_watch = False
         self.stop_watch_start_time = None
         self.stop_watch_stop_time  = None
+        self.calendar_offset = 0
+
+    def calendar_right(self):
+        self.calendar_offset += 1
+        self.queue_draw()
+
+    def calendar_left(self):
+        self.calendar_offset -= 1
+        self.queue_draw()
 
 def realize_cb(widget):
     pixmap = gtk.gdk.Pixmap(None, 1, 1, 1)
@@ -313,6 +364,17 @@ def run(Widget):
                              modifier,
                              gtk.ACCEL_VISIBLE,
                              lambda *args: widget.clear_stop_watch())
+
+    key, modifier = gtk.accelerator_parse('1')
+    accelgroup.connect_group(key,
+                             modifier,
+                             gtk.ACCEL_VISIBLE,
+                             lambda *args: widget.calendar_left())
+    key, modifier = gtk.accelerator_parse('2')
+    accelgroup.connect_group(key,
+                             modifier,
+                             gtk.ACCEL_VISIBLE,
+                             lambda *args: widget.calendar_right())
     window.add_accel_group(accelgroup)
 
     window.set_size_request(1200,900)
