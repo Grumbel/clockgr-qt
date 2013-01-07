@@ -23,9 +23,11 @@ pygtk.require('2.0')
 import gtk, gobject, cairo
 
 background_color = (0,0,0)
+midcolor = (0.5, 0.5, 0.5)
 foreground_color = (1,1,1)
 
 foreground_color = (0,0,0)
+midcolor = (0.5, 0.5, 0.5)
 background_color = (1,1,1)
 
 system_font = "DejaVu Sans"
@@ -195,13 +197,13 @@ class Screen(gtk.DrawingArea):
                 else:
                     if today.day == now.day and today.month == now.month and self.calendar_offset == 0:
                         # cr.set_source_rgb(*foreground_color)
-                        cr.set_source_rgb(0.9, 0.9, 0.9)
+                        cr.set_source_rgb(*foreground_color)
                         cr.rectangle(x_pos + x * cell_width - cell_width/2, 
                                      y_pos + 32 + cell_height + y * cell_height - cell_height/2 - 10, 
                                      cell_width, cell_height)
                         cr.fill()
-                        # cr.set_source_rgb(*background_color)
-                        cr.set_source_rgb(*foreground_color)
+                        cr.set_source_rgb(*background_color)
+                        # cr.set_source_rgb(*foreground_color)
                         cr.select_font_face(system_font,
                                             cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
                     else:
@@ -225,7 +227,7 @@ class Screen(gtk.DrawingArea):
         cr.arc(x, y, width, 0, 2 * math.pi)
         cr.stroke()
 
-        cr.set_source_rgb(0.5,0.5,0.5)
+        cr.set_source_rgb(*midcolor)
         cr.set_line_width(4.0)
         cr.set_line_cap(cairo.LINE_CAP_ROUND)
         cr.new_path()
@@ -276,7 +278,7 @@ class Screen(gtk.DrawingArea):
         cr.stroke()
 
         # second
-        cr.set_source_rgb(0.5,0.5,0.5)
+        cr.set_source_rgb(*midcolor)
         cr.new_path()
         cr.set_line_width(4.0)
         cr.set_line_cap(cairo.LINE_CAP_ROUND)
@@ -333,6 +335,11 @@ class Screen(gtk.DrawingArea):
         self.calendar_offset -= 1
         self.queue_draw()
 
+    def invert(self):
+        global foreground_color, background_color
+        foreground_color, background_color = background_color, foreground_color
+        self.queue_draw()
+
 def realize_cb(widget):
     pixmap = gtk.gdk.Pixmap(None, 1, 1, 1)
     color = gtk.gdk.Color()
@@ -375,6 +382,13 @@ def run(Widget):
                              modifier,
                              gtk.ACCEL_VISIBLE,
                              lambda *args: widget.calendar_right())
+
+    key, modifier = gtk.accelerator_parse('i')
+    accelgroup.connect_group(key,
+                             modifier,
+                             gtk.ACCEL_VISIBLE,
+                             lambda *args: widget.invert())
+
     window.add_accel_group(accelgroup)
 
     window.set_size_request(1200,900)
