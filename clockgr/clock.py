@@ -25,7 +25,7 @@ import gtk, gobject, cairo
 from .desklets.digital_clock import *
 from .desklets.analog_clock import *
 from .desklets.world import *
-from .desklets.calender import *
+from .desklets.calendar import *
 from .desklets.stop_watch import *
 
 background_color = (1, 1, 1)
@@ -47,7 +47,7 @@ class ClockWidget(gtk.DrawingArea):
         
         self.digital_clock = DigitalClock()
         self.analog_clock = AnalogClock()
-        self.calender = CalenderDesklet()
+        self.calendar = CalendarDesklet()
         self.world = World()
         self.stop_watch_desklet = StopWatch()
 
@@ -58,12 +58,8 @@ class ClockWidget(gtk.DrawingArea):
     # Handle the expose-event by drawing
     def do_expose_event(self, event):
         if self.window:
-            # Create the cairo context
-            # cr = self.window.cairo_create()
-
-            # root = gtk.gdk.get_default_root_window()
-            root = self.window
-            cr = root.cairo_create()
+            cr = self.window.cairo_create()
+            # cr = gtk.gdk.get_default_root_window().cairo_create()
 
             # Restrict Cairo to the exposed area; avoid extra work
             if event:
@@ -91,7 +87,7 @@ class ClockWidget(gtk.DrawingArea):
         if self.stop_watch_start_time:
             self.stop_watch_desklet.draw(cr, now)
         else:
-            self.calender.draw(cr, now, 80, 100)
+            self.calendar.draw(cr, now, 80, 100)
         
     def start_stop_watch(self):
         if self.stop_watch:
@@ -173,12 +169,12 @@ def main(args):
     accelgroup.connect_group(key,
                              modifier,
                              gtk.ACCEL_VISIBLE,
-                             lambda *args: widget.calendar_left())
+                             lambda *args: widget.calendar.previous_month())
     key, modifier = gtk.accelerator_parse('2')
     accelgroup.connect_group(key,
                              modifier,
                              gtk.ACCEL_VISIBLE,
-                             lambda *args: widget.calendar_right())
+                             lambda *args: widget.calendar.next_month())
 
     key, modifier = gtk.accelerator_parse('i')
     accelgroup.connect_group(key,
@@ -186,12 +182,11 @@ def main(args):
                              gtk.ACCEL_VISIBLE,
                              lambda *args: widget.invert())
 
-    # root = gtk.gdk.get_default_root_window()
-    # root.add_accel_group(accelgroup)
+    window.add_accel_group(accelgroup)
 
-    # window.set_size_request(1200,900)
-    # window.connect("delete-event", gtk.main_quit)
-    # window.connect("realize", realize_cb)
+    window.set_size_request(1200,900)
+    window.connect("delete-event", gtk.main_quit)
+    window.connect("realize", realize_cb)
 
     gobject.timeout_add (1000, widget.update)
     
