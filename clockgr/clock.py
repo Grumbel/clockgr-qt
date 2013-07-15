@@ -28,35 +28,41 @@ from .desklets.world import *
 from .desklets.calendar import *
 from .desklets.stop_watch import *
 
-background_color = (1, 1, 1)
-midcolor = (0.5, 0.5, 0.5)
-foreground_color = (0,0,0)
-
-system_font = "DejaVu Sans"
-# system_font = "DejaVu Serif"
-# system_font = "Inconsolata"
-# system_font = "Arial"
-# system_font = "Segoe UI"
-system_font = "Calibri"
-# system_font = "Corbel"
-# system_font = "Candara"
-
 class ClockWidget(gtk.DrawingArea):
     def __init__(self, *args):
         gtk.DrawingArea.__init__(self, *args)
-        
-        self.digital_clock = DigitalClock()
-        self.analog_clock = AnalogClock()
-        self.calendar = CalendarDesklet()
-        self.world = World()
-        self.stop_watch_desklet = StopWatch()
 
-        self.stop_watch = False
-        self.stop_watch_start_time  = None
-        self.stop_watch_stop_time  = None
+        self.my_style = Style()
+       
+        self.digital_clock = DigitalClock()
+        self.digital_clock.set_parent(self)
+        self.digital_clock.set_style(self.my_style)
+        self.digital_clock.set_rect(32, 770, 100, 100)
+        
+        self.analog_clock = AnalogClock()
+        self.analog_clock.set_parent(self)
+        self.analog_clock.set_style(self.my_style)
+        self.analog_clock.set_rect(900, 300, 256, 256)
+
+        self.calendar = CalendarDesklet()
+        self.calendar.set_parent(self)
+        self.calendar.set_style(self.my_style)
+        self.calendar.set_rect(80, 100, 0, 0)
+
+        self.world = WorldDesklet()
+        self.world.set_parent(self)
+        self.world.set_style(self.my_style)
+        self.world.set_rect(1200 - 540 - 16, 900  - 276 - 32, 0, 0)
+        
+        self.stop_watch = StopWatch()
+        self.stop_watch.set_parent(self)
+        self.stop_watch.set_style(self.my_style)
+        self.stop_watch.set_rect(32, 64, 500, 180)
+
+        self.connect("expose-event", self.do_expose_event)
 
     # Handle the expose-event by drawing
-    def do_expose_event(self, event):
+    def do_expose_event(self, widget, event):
         if self.window:
             cr = self.window.cairo_create()
             # cr = gtk.gdk.get_default_root_window().cairo_create()
@@ -69,66 +75,33 @@ class ClockWidget(gtk.DrawingArea):
 
             self.draw(cr, 1680, 1050)
 
-    def queue_draw(self):
-        self.do_expose_event(None)
-
     def draw(self, cr, width, height):
         # Fill the background with gray
-        cr.set_source_rgb(*background_color)
+        cr.set_source_rgb(*self.my_style.background_color)
         cr.rectangle(0, 0, width, height)
         cr.fill()
 
         now = datetime.now()
 
         self.digital_clock.draw(cr, now)
-        self.analog_clock.draw(cr, now, 900, 300, 256, 256)
+        self.analog_clock.draw(cr, now)
         self.world.draw(cr)
 
-        if self.stop_watch_start_time:
-            self.stop_watch_desklet.draw(cr, now)
+        if self.stop_watch.is_running():
+            self.stop_watch.draw(cr, now)
         else:
-            self.calendar.draw(cr, now, 80, 100)
-        
-    def start_stop_watch(self):
-        if self.stop_watch:
-            self.update_fast()
-            self.stop_watch = False            
-            self.stop_watch_stop_time = datetime.now()
-        else:
-            self.stop_watch = True
-            if not self.stop_watch_stop_time:
-                self.stop_watch_start_time = datetime.now()
-            else:
-                self.stop_watch_start_time = datetime.now() - (self.stop_watch_stop_time - self.stop_watch_start_time)
-                self.stop_watch_stop_time  = None
-            gobject.timeout_add(31, self.update_fast)
-            self.queue_draw()
-
-    def clear_stop_watch(self):
-        self.queue_draw()
-        self.stop_watch = False
-        self.stop_watch_start_time = None
-        self.stop_watch_stop_time  = None
-        self.calendar_offset = 0
+            self.calendar.draw(cr, now)
 
     def update(self):
-        if not self.stop_watch:
-            self.queue_draw()
+        self.queue_draw()
         return True
 
-    def update_fast(self):
-        self.queue_draw_area(0, 0, 500, 180)
-        if self.stop_watch:
-            return True
-        else:
-            return False
-
     def invert(self):
-        global foreground_color, background_color
-        foreground_color, background_color = background_color, foreground_color
+        self.my_style.background_color, self.my_style.foreground_color = self.my_style.foreground_color, self.my_style.background_color
         self.queue_draw()
 
 def realize_cb(widget):
+    print "realize_cb"
     pixmap = gtk.gdk.Pixmap(None, 1, 1, 1)
     color = gtk.gdk.Color()
     cursor = gtk.gdk.Cursor(pixmap, pixmap, color, color, 0, 0)
@@ -136,6 +109,7 @@ def realize_cb(widget):
 
 def main(args):
     window = gtk.Window()
+    window.set_title("ClockGr")
     widget = ClockWidget()
     widget.show()
     window.add(widget)
@@ -158,12 +132,12 @@ def main(args):
     accelgroup.connect_group(key,
                              modifier,
                              gtk.ACCEL_VISIBLE,
-                             lambda *args: widget.start_stop_watch())
+                             lambda *args: widget.stop_watch.start_stop_watch())
     key, modifier = gtk.accelerator_parse('Return')
     accelgroup.connect_group(key,
                              modifier,
                              gtk.ACCEL_VISIBLE,
-                             lambda *args: widget.clear_stop_watch())
+                             lambda *args: widget.stop_watch.clear_stop_watch())
 
     key, modifier = gtk.accelerator_parse('1')
     accelgroup.connect_group(key,
