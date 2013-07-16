@@ -29,9 +29,27 @@ from .desklets.calendar import *
 from .desklets.stop_watch import *
 
 class ClockWidget(gtk.DrawingArea):
-    def __init__(self, *args):
-        gtk.DrawingArea.__init__(self, *args)
+    def __init__(self, renderer):
+        gtk.DrawingArea.__init__(self)
+        self.renderer = renderer
+        self.renderer.set_parent(self)
+        self.connect("expose-event", self.do_expose_event)
 
+    def do_expose_event(self, widget, event):
+        if self.window:
+            cr = self.window.cairo_create()
+
+            # Restrict Cairo to the exposed area; avoid extra work
+            if event:
+                cr.rectangle(event.area.x, event.area.y,
+                             event.area.width, event.area.height)
+                cr.clip()
+
+            self.renderer.draw(cr, 1680, 1050)
+
+class ClockRenderer(object):
+    def __init__(self):
+        self.parent = None
         self.my_style = Style()
        
         self.digital_clock = DigitalClock()
@@ -59,21 +77,18 @@ class ClockWidget(gtk.DrawingArea):
         self.stop_watch.set_style(self.my_style)
         self.stop_watch.set_rect(32, 64, 500, 180)
 
-        self.connect("expose-event", self.do_expose_event)
+    def set_parent(self, parent):
+        self.parent = parent
 
-    # Handle the expose-event by drawing
-    def do_expose_event(self, widget, event):
-        if self.window:
-            cr = self.window.cairo_create()
-            # cr = gtk.gdk.get_default_root_window().cairo_create()
-
-            # Restrict Cairo to the exposed area; avoid extra work
-            if event:
-                cr.rectangle(event.area.x, event.area.y,
-                             event.area.width, event.area.height)
-                cr.clip()
-
-            self.draw(cr, 1680, 1050)
+    def queue_draw(self):
+        if self.parent: 
+            self.parent.queue_draw()
+        else:
+            root = gtk.gdk.get_default_root_window()
+            rect = root.get_frame_extents()
+            root.invalidate_rect(rect, False)
+            cr = root.cairo_create()
+            self.draw(cr, rect.width, rect.height)
 
     def draw(self, cr, width, height):
         # Fill the background with gray
@@ -107,62 +122,76 @@ def realize_cb(widget):
     cursor = gtk.gdk.Cursor(pixmap, pixmap, color, color, 0, 0)
     widget.window.set_cursor(cursor)
 
-def main(args):
-    window = gtk.Window()
-    window.set_title("ClockGr")
-    widget = ClockWidget()
-    widget.show()
-    window.add(widget)
-    window.present()
+def main(argv):
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='ClockGr - A toy clock application')
+    parser.add_argument('--root-window', action='store_true', help='Display the clock on the root window')
+    args = parser.parse_args()
+    
+    use_root_window = args.root_window
 
-    window.set_size_request(1200,900)
+    if use_root_window:
+        renderer = ClockRenderer()
+        renderer.invert()
+        gobject.timeout_add (1000, renderer.update)
+    else:
+        renderer = ClockRenderer()
+        widget = ClockWidget(renderer)
+        window = gtk.Window()
+        window.set_title("ClockGr")
+        widget.show()
+        window.add(widget)
+        window.present()
 
-    accelgroup = gtk.AccelGroup()
-    key, modifier = gtk.accelerator_parse('Escape')
-    accelgroup.connect_group(key,
-                             modifier,
-                             gtk.ACCEL_VISIBLE,
-                             gtk.main_quit)
-    key, modifier = gtk.accelerator_parse('f')
-    accelgroup.connect_group(key,
-                             modifier,
-                             gtk.ACCEL_VISIBLE,
-                             lambda *args: window.fullscreen())
-    key, modifier = gtk.accelerator_parse('space')
-    accelgroup.connect_group(key,
-                             modifier,
-                             gtk.ACCEL_VISIBLE,
-                             lambda *args: widget.stop_watch.start_stop_watch())
-    key, modifier = gtk.accelerator_parse('Return')
-    accelgroup.connect_group(key,
-                             modifier,
-                             gtk.ACCEL_VISIBLE,
-                             lambda *args: widget.stop_watch.clear_stop_watch())
+        window.set_size_request(1200,900)
 
-    key, modifier = gtk.accelerator_parse('1')
-    accelgroup.connect_group(key,
-                             modifier,
-                             gtk.ACCEL_VISIBLE,
-                             lambda *args: widget.calendar.previous_month())
-    key, modifier = gtk.accelerator_parse('2')
-    accelgroup.connect_group(key,
-                             modifier,
-                             gtk.ACCEL_VISIBLE,
-                             lambda *args: widget.calendar.next_month())
+        accelgroup = gtk.AccelGroup()
+        key, modifier = gtk.accelerator_parse('Escape')
+        accelgroup.connect_group(key,
+                                 modifier,
+                                 gtk.ACCEL_VISIBLE,
+                                 gtk.main_quit)
+        key, modifier = gtk.accelerator_parse('f')
+        accelgroup.connect_group(key,
+                                 modifier,
+                                 gtk.ACCEL_VISIBLE,
+                                 lambda *args: window.fullscreen())
+        key, modifier = gtk.accelerator_parse('space')
+        accelgroup.connect_group(key,
+                                 modifier,
+                                 gtk.ACCEL_VISIBLE,
+                                 lambda *args: widget.stop_watch.start_stop_watch())
+        key, modifier = gtk.accelerator_parse('Return')
+        accelgroup.connect_group(key,
+                                 modifier,
+                                 gtk.ACCEL_VISIBLE,
+                                 lambda *args: widget.stop_watch.clear_stop_watch())
 
-    key, modifier = gtk.accelerator_parse('i')
-    accelgroup.connect_group(key,
-                             modifier,
-                             gtk.ACCEL_VISIBLE,
-                             lambda *args: widget.invert())
+        key, modifier = gtk.accelerator_parse('1')
+        accelgroup.connect_group(key,
+                                 modifier,
+                                 gtk.ACCEL_VISIBLE,
+                                 lambda *args: widget.calendar.previous_month())
+        key, modifier = gtk.accelerator_parse('2')
+        accelgroup.connect_group(key,
+                                 modifier,
+                                 gtk.ACCEL_VISIBLE,
+                                 lambda *args: widget.calendar.next_month())
 
-    window.add_accel_group(accelgroup)
+        key, modifier = gtk.accelerator_parse('i')
+        accelgroup.connect_group(key,
+                                 modifier,
+                                 gtk.ACCEL_VISIBLE,
+                                 lambda *args: widget.invert())
 
-    window.set_size_request(1200,900)
-    window.connect("delete-event", gtk.main_quit)
-    window.connect("realize", realize_cb)
+        window.add_accel_group(accelgroup)
 
-    gobject.timeout_add (1000, widget.update)
+        window.set_size_request(1200,900)
+        window.connect("delete-event", gtk.main_quit)
+        window.connect("realize", realize_cb)
+
+        gobject.timeout_add (1000, renderer.update)
     
     gtk.main()
 
