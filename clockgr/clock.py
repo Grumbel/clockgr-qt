@@ -55,22 +55,22 @@ class ClockRenderer(object):
         self.digital_clock = DigitalClock()
         self.digital_clock.set_parent(self)
         self.digital_clock.set_style(self.my_style)
-        self.digital_clock.set_rect(32, 770, 100, 100)
+        self.digital_clock.set_rect(32, 670, 640, 200)
         
         self.analog_clock = AnalogClock()
         self.analog_clock.set_parent(self)
         self.analog_clock.set_style(self.my_style)
-        self.analog_clock.set_rect(900, 300, 256, 256)
+        self.analog_clock.set_rect(900-256, 32, 512, 512)
 
         self.calendar = CalendarDesklet()
         self.calendar.set_parent(self)
         self.calendar.set_style(self.my_style)
-        self.calendar.set_rect(80, 100, 0, 0)
+        self.calendar.set_rect(32, 32, 512, 412)
 
         self.world = WorldDesklet()
         self.world.set_parent(self)
         self.world.set_style(self.my_style)
-        self.world.set_rect(1200 - 540 - 16, 900  - 276 - 32, 0, 0)
+        self.world.set_rect(1200 - 540 - 32, 900 - 276 - 32, 540, 276)
         
         self.stop_watch = StopWatch()
         self.stop_watch.set_parent(self)
@@ -100,7 +100,7 @@ class ClockRenderer(object):
 
         self.digital_clock.draw(cr, now)
         self.analog_clock.draw(cr, now)
-        self.world.draw(cr)
+        self.world.draw(cr, now)
 
         if self.stop_watch.is_running():
             self.stop_watch.draw(cr, now)

@@ -41,7 +41,7 @@ class StopWatch(Desklet):
         self.stop_watch_stop_time  = None
         self.queue_draw()
 
-    def draw(self, cr, now):
+    def on_draw(self, cr, now):
         if self.stop_watch_stop_time:
             t = self.stop_watch_stop_time - self.stop_watch_start_time
         else:

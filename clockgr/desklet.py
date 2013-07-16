@@ -25,6 +25,13 @@ class Desklet(object):
         self.width  = width
         self.height = height
 
+    def draw(self, cr, now):
+        self.on_draw(cr, now)
+
+        cr.set_source_rgba(1.0, 1.0, 0, 0.5)
+        cr.rectangle(self.x, self.y, self.width, self.height)
+        cr.fill()
+
     def queue_draw(self):
         # FIXME: missing proper width/height on the desklets, so use queue_draw() instead
         # self.parent.queue_draw_area(self.x, self.y, self.width, self.height)

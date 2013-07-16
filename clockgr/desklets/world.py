@@ -8,8 +8,10 @@ class WorldDesklet(Desklet):
 
         self.world = cairo.ImageSurface.create_from_png("world.png")
 
-    def draw(self, cr):
-        cr.set_source_surface(self.world, self.x, self.y)
+    def on_draw(self, cr, now):
+        cr.set_source_surface(self.world, 
+                              self.x + self.width/2.0 - self.world.get_width()/2.0,
+                              self.y + self.height/2.0 - self.world.get_height()/2.0)
         cr.paint_with_alpha(0.125)
 
 # EOF #

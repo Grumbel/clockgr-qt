@@ -6,7 +6,7 @@ class DigitalClock(Desklet):
     def __init__(self):
         super(DigitalClock, self).__init__()
 
-    def draw(self, cr, now):
+    def on_draw(self, cr, now):
         date    = now.strftime("%A, %d. %B %Y")
         time    = now.strftime("%H:%M")
         seconds = now.strftime("%S")
@@ -15,16 +15,26 @@ class DigitalClock(Desklet):
         cr.set_source_rgb(*self.style.foreground_color)
 
         cr.set_font_size(192 * 0.75)
-        cr.move_to(self.x, self.y)
-        cr.show_text(time)
         xbearing, ybearing, width, height, xadvance, yadvance = cr.text_extents(time)
 
+        pos_x = self.x
+        pos_y = self.y
+
+        pos_y += height
+
+        cr.move_to(pos_x, pos_y)
+        cr.show_text(time)
+
         cr.set_font_size(192 * 0.6)
-        cr.move_to(self.x + width + 32, self.y)
+        cr.move_to(pos_x + width + 32, pos_y)
         cr.show_text(seconds)
 
+        pos_y += yadvance
         cr.set_font_size(56)
-        cr.move_to(self.x, self.y + 70)
+        xbearing, ybearing, width, height, xadvance, yadvance = cr.text_extents(date)
+        pos_y += height
+
+        cr.move_to(pos_x, pos_y)
         cr.show_text(date)
 
 # EOF #
