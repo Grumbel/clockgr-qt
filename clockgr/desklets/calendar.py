@@ -20,8 +20,8 @@ class CalendarDesklet(Desklet):
     def on_draw(self, cr, now):
         cr.select_font_face(self.style.font, self.style.font_slant, self.style.font_weight)
 
-        pos_x = self.x
-        pos_y = self.y
+        pos_x = 0
+        pos_y = 0
 
         self.cell_width  = (self.width) / 7.0
         self.cell_height = (self.height - 64) / 7.0

@@ -26,7 +26,10 @@ class Desklet(object):
         self.height = height
 
     def draw(self, cr, now):
+        cr.save()
+        cr.translate(self.x, self.y)
         self.on_draw(cr, now)
+        cr.restore()
 
         # cr.set_source_rgba(1.0, 1.0, 0, 0.5)
         # cr.rectangle(self.x, self.y, self.width, self.height)

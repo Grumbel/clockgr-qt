@@ -8,8 +8,8 @@ class AnalogClock(Desklet):
         super(AnalogClock, self).__init__()
 
     def on_draw(self, cr, now):
-        center_x = self.x + self.width/2.0
-        center_y = self.y + self.height/2.0
+        center_x = self.width/2.0
+        center_y = self.height/2.0
         radius = min(self.width, self.height)/2.0 - 3.0
 
         cr.set_source_rgb(*self.style.foreground_color)

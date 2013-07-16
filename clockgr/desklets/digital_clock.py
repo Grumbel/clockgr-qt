@@ -17,8 +17,8 @@ class DigitalClock(Desklet):
         cr.set_font_size(192 * 0.75)
         xbearing, ybearing, width, height, xadvance, yadvance = cr.text_extents(time)
 
-        pos_x = self.x
-        pos_y = self.y
+        pos_x = 0
+        pos_y = 0
 
         pos_y += height
 

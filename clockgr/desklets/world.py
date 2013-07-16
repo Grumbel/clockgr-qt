@@ -10,8 +10,8 @@ class WorldDesklet(Desklet):
 
     def on_draw(self, cr, now):
         cr.set_source_surface(self.world, 
-                              self.x + self.width/2.0 - self.world.get_width()/2.0,
-                              self.y + self.height/2.0 - self.world.get_height()/2.0)
+                              self.width/2.0 - self.world.get_width()/2.0,
+                              self.height/2.0 - self.world.get_height()/2.0)
         cr.paint_with_alpha(0.125)
 
 # EOF #

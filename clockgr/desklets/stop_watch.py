@@ -55,17 +55,17 @@ class StopWatch(Desklet):
         cr.set_source_rgb(*self.style.foreground_color)
 
         cr.set_font_size(24)
-        cr.move_to(self.x, self.y)
+        cr.move_to(0, 0)
         cr.show_text("Stopwatch:")
 
         cr.set_font_size(192/2)
-        cr.move_to(self.x, self.y + 86)
+        cr.move_to(0, 0 + 86)
         cr.show_text(time)
 
         xbearing, ybearing, width, height, xadvance, yadvance = cr.text_extents(time)
 
         cr.set_font_size(192/2 * 0.6)
-        cr.move_to(self.x + width + 16, self.y + 86)
+        cr.move_to(0 + width + 16, 0 + 86)
         cr.show_text(seconds)
 
 # EOF #
