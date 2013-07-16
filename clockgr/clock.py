@@ -80,6 +80,10 @@ class ClockRenderer(object):
     def set_parent(self, parent):
         self.parent = parent
 
+    def queue_draw_area(self, x, y, width, height):
+        if self.parent: 
+            self.parent.queue_draw_area(x, y, width, height)
+
     def queue_draw(self):
         if self.parent: 
             self.parent.queue_draw()
@@ -161,29 +165,29 @@ def main(argv):
         accelgroup.connect_group(key,
                                  modifier,
                                  gtk.ACCEL_VISIBLE,
-                                 lambda *args: widget.stop_watch.start_stop_watch())
+                                 lambda *args: renderer.stop_watch.start_stop_watch())
         key, modifier = gtk.accelerator_parse('Return')
         accelgroup.connect_group(key,
                                  modifier,
                                  gtk.ACCEL_VISIBLE,
-                                 lambda *args: widget.stop_watch.clear_stop_watch())
+                                 lambda *args: renderer.stop_watch.clear_stop_watch())
 
         key, modifier = gtk.accelerator_parse('1')
         accelgroup.connect_group(key,
                                  modifier,
                                  gtk.ACCEL_VISIBLE,
-                                 lambda *args: widget.calendar.previous_month())
+                                 lambda *args: renderer.calendar.previous_month())
         key, modifier = gtk.accelerator_parse('2')
         accelgroup.connect_group(key,
                                  modifier,
                                  gtk.ACCEL_VISIBLE,
-                                 lambda *args: widget.calendar.next_month())
+                                 lambda *args: renderer.calendar.next_month())
 
         key, modifier = gtk.accelerator_parse('i')
         accelgroup.connect_group(key,
                                  modifier,
                                  gtk.ACCEL_VISIBLE,
-                                 lambda *args: widget.invert())
+                                 lambda *args: renderer.invert())
 
         window.add_accel_group(accelgroup)
 
