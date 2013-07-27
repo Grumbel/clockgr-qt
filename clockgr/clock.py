@@ -47,35 +47,50 @@ class ClockWidget(gtk.DrawingArea):
 
             self.renderer.draw(cr, 1680, 1050)
 
+class ClockMode:
+    calendar  = 1
+    stopwatch = 2
+
 class ClockRenderer(object):
     def __init__(self):
         self.parent = None
         self.my_style = Style()
-       
-        self.digital_clock = DigitalClock()
-        self.digital_clock.set_parent(self)
-        self.digital_clock.set_style(self.my_style)
-        self.digital_clock.set_rect(32, 670, 640, 200)
-        
-        self.analog_clock = AnalogClock()
-        self.analog_clock.set_parent(self)
-        self.analog_clock.set_style(self.my_style)
-        self.analog_clock.set_rect(900-256, 32, 512, 512)
+        self.desklets = []
+        self.active_desklets = []
 
-        self.calendar = CalendarDesklet()
-        self.calendar.set_parent(self)
-        self.calendar.set_style(self.my_style)
-        self.calendar.set_rect(32, 32, 512, 412)
-
-        self.world = WorldDesklet()
-        self.world.set_parent(self)
-        self.world.set_style(self.my_style)
-        self.world.set_rect(1200 - 540 - 32, 900 - 276 - 32, 540, 276)
+        self.digital_clock = self.add_desklet(DigitalClock(),    (32, 670, 640, 200))
+        self.analog_clock  = self.add_desklet(AnalogClock(),     (900-256, 32, 512, 512))
+        self.calendar      = self.add_desklet(CalendarDesklet(), (32, 32, 512, 412))
+        self.world         = self.add_desklet(WorldDesklet(),    (1200 - 540 - 32, 900 - 276 - 32, 540, 276))
+        self.stopwatch    = self.add_desklet(StopWatch(),       (32, 64, 500, 180))
         
-        self.stop_watch = StopWatch()
-        self.stop_watch.set_parent(self)
-        self.stop_watch.set_style(self.my_style)
-        self.stop_watch.set_rect(32, 64, 500, 180)
+        self.mode = ClockMode.calendar
+        self.apply_mode()
+
+
+    def next_mode(self):
+        print self.mode
+
+        if self.mode == ClockMode.calendar:
+            self.mode = ClockMode.stopwatch
+        else:
+            self.mode = ClockMode.calendar
+
+        self.apply_mode()
+        self.queue_draw()
+
+    def apply_mode(self):
+        if self.mode == ClockMode.calendar:
+            self.active_desklets = [d for d in self.desklets if d != self.stopwatch]
+        elif self.mode == ClockMode.stopwatch:
+            self.active_desklets = [d for d in self.desklets if d != self.calendar]
+
+    def add_desklet(self, desklet, rect):
+        desklet.set_parent(self)
+        desklet.set_style(self.my_style)
+        desklet.set_rect(*rect)
+        self.desklets.append(desklet)
+        return desklet
 
     def set_parent(self, parent):
         self.parent = parent
@@ -102,14 +117,8 @@ class ClockRenderer(object):
 
         now = datetime.now()
 
-        self.digital_clock.draw(cr, now)
-        self.analog_clock.draw(cr, now)
-        self.world.draw(cr, now)
-
-        if self.stop_watch.is_running():
-            self.stop_watch.draw(cr, now)
-        else:
-            self.calendar.draw(cr, now)
+        for desklet in self.active_desklets:
+            desklet.draw(cr, now)
 
     def update(self):
         self.queue_draw()
@@ -165,12 +174,12 @@ def main(argv):
         accelgroup.connect_group(key,
                                  modifier,
                                  gtk.ACCEL_VISIBLE,
-                                 lambda *args: renderer.stop_watch.start_stop_watch())
+                                 lambda *args: renderer.stopwatch.start_stop_watch())
         key, modifier = gtk.accelerator_parse('Return')
         accelgroup.connect_group(key,
                                  modifier,
                                  gtk.ACCEL_VISIBLE,
-                                 lambda *args: renderer.stop_watch.clear_stop_watch())
+                                 lambda *args: renderer.stopwatch.clear_stop_watch())
 
         key, modifier = gtk.accelerator_parse('1')
         accelgroup.connect_group(key,
@@ -188,6 +197,12 @@ def main(argv):
                                  modifier,
                                  gtk.ACCEL_VISIBLE,
                                  lambda *args: renderer.invert())
+
+        key, modifier = gtk.accelerator_parse('m')
+        accelgroup.connect_group(key,
+                                 modifier,
+                                 gtk.ACCEL_VISIBLE,
+                                 lambda *args: renderer.next_mode())
 
         window.add_accel_group(accelgroup)
 

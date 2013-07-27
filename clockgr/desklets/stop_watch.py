@@ -4,48 +4,75 @@ from datetime import datetime, timedelta
 
 from ..desklet import *
 
+class Timer(object):
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self.start_time = None
+        self.stop_time  = None
+
+    def is_running(self):
+        return self.start_time != None and self.stop_time == None
+
+    def get_time(self):
+        if self.start_time:
+            if self.stop_time:
+                return self.stop_time - self.start_time
+            else:
+                return datetime.now() - self.start_time
+        else:
+            return timedelta(0)
+       
+    def start(self):
+        if self.stop_time == None:
+            self.start_time = datetime.now()
+        else:
+            self.start_time = datetime.now() - (self.stop_time - self.start_time)
+            self.stop_time  = None
+
+    def stop(self):
+        if self.stop_time == None:
+            self.stop_time = datetime.now()
+
+    def start_stop(self):
+        if self.is_running():
+            self.stop()
+        else:
+            self.start()
+
 class StopWatch(Desklet):
     def __init__(self):
         super(StopWatch, self).__init__()
-
-        self.stop_watch = False
-        self.stop_watch_start_time = None
-        self.stop_watch_stop_time  = None
+        self.timer = Timer()
+        self.timeout_handle = None
         
-    def is_running(self):
-        if self.stop_watch_start_time:
-            return True
-        else:
-            return False
-
-    def update(self):
+    def on_timeout(self):
         self.queue_draw()
-        return self.stop_watch
+        return True
+
+    def is_running(self):
+        return self.timer.is_running()
 
     def start_stop_watch(self):
-        if self.stop_watch:
-            self.stop_watch = False            
-            self.stop_watch_stop_time = datetime.now()
+        self.timer.start_stop()
+
+        if self.timer.is_running():
+            if not self.timeout_handle:
+                self.timeout_handle = gobject.timeout_add(31, self.on_timeout)
         else:
-            self.stop_watch = True
-            if not self.stop_watch_stop_time:
-                self.stop_watch_start_time = datetime.now()
-            else:
-                self.stop_watch_start_time = datetime.now() - (self.stop_watch_stop_time - self.stop_watch_start_time)
-                self.stop_watch_stop_time  = None
-            gobject.timeout_add(31, self.update)
+            if self.timeout_handle:
+                gobject.source_remove(self.timeout_handle)
+                self.timeout_handle = None
+
+        self.queue_draw()
 
     def clear_stop_watch(self):
-        self.stop_watch = False
-        self.stop_watch_start_time = None
-        self.stop_watch_stop_time  = None
+        self.timer.reset()
         self.queue_draw()
 
     def on_draw(self, cr, now):
-        if self.stop_watch_stop_time:
-            t = self.stop_watch_stop_time - self.stop_watch_start_time
-        else:
-            t = now - self.stop_watch_start_time
+        t = self.timer.get_time()
 
         time    = "%02d:%02d" % (t.seconds/(60*60), (t.seconds%(60*60))/60)
         seconds = "%02d'%02d" % (t.seconds%60, t.microseconds/10000)
