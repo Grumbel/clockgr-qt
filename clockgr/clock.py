@@ -28,6 +28,14 @@ from .desklets.world import *
 from .desklets.calendar import *
 from .desklets.stop_watch import *
 
+def is_olpc():
+    try:
+        with open("/etc/fedora-release") as f:
+            content = f.read()
+        return content[0:4] == "OLPC"
+    except IOError as e:
+        return False
+
 class ClockWidget(gtk.DrawingArea):
     def __init__(self, renderer):
         gtk.DrawingArea.__init__(self)
@@ -157,7 +165,9 @@ def main(argv):
         window.add(widget)
         window.present()
 
-        window.set_size_request(1200,900)
+        window.set_default_size(1200,900)
+        if is_olpc():
+            window.fullscreen()
 
         accelgroup = gtk.AccelGroup()
         key, modifier = gtk.accelerator_parse('Escape')
