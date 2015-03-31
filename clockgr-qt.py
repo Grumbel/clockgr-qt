@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import math
 from datetime import datetime
 from PyQt5.QtGui import QPen, QBrush, QColor, QPainter
 from PyQt5.QtCore import QRect, QTimer
@@ -9,9 +10,6 @@ from PyQt5.QtWidgets import (QGraphicsScene, QMainWindow, QWidget,
                              QGraphicsItemGroup, QGraphicsRectItem,
                              QGraphicsEllipseItem, QGraphicsLineItem)
 from PyQt5.Qt import Qt
-
-import cairo
-import math
 
 
 class AnalogClock:
