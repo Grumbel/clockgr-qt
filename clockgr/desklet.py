@@ -1,18 +1,18 @@
-import gtk.gdk
+from style import Style
 
-from style import *
 
 class Desklet(object):
+
     def __init__(self):
         self.parent = None
-        
+
         self.x = 0
         self.y = 0
-        self.width  = 0
+        self.width = 0
         self.height = 0
 
         self.style = Style()
-        
+
     def set_parent(self, parent):
         self.parent = parent
 
@@ -22,7 +22,7 @@ class Desklet(object):
     def set_rect(self, x, y, width, height):
         self.x = x
         self.y = y
-        self.width  = width
+        self.width = width
         self.height = height
 
     def draw(self, cr, now):
@@ -37,5 +37,6 @@ class Desklet(object):
 
     def queue_draw(self):
         self.parent.queue_draw_area(self.x, self.y, self.width, self.height)
+
 
 # EOF #

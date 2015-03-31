@@ -1,4 +1,5 @@
-__all__ = [ "clock", "desklets", "desklet" ]
+__all__ = ["clock", "desklets", "desklet"]
+
 
 def main(argv=None):
     from . import clock

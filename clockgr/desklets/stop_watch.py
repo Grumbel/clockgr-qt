@@ -1,19 +1,20 @@
-import cairo
 import gobject
 from datetime import datetime, timedelta
 
-from ..desklet import *
+from ..desklet import Desklet
+
 
 class Timer(object):
+
     def __init__(self):
         self.reset()
 
     def reset(self):
         self.start_time = None
-        self.stop_time  = None
+        self.stop_time = None
 
     def is_running(self):
-        return self.start_time != None and self.stop_time == None
+        return self.start_time is not None and self.stop_time is None
 
     def get_time(self):
         if self.start_time:
@@ -23,16 +24,16 @@ class Timer(object):
                 return datetime.now() - self.start_time
         else:
             return timedelta(0)
-       
+
     def start(self):
-        if self.stop_time == None:
+        if self.stop_time is None:
             self.start_time = datetime.now()
         else:
             self.start_time = datetime.now() - (self.stop_time - self.start_time)
-            self.stop_time  = None
+            self.stop_time = None
 
     def stop(self):
-        if self.stop_time == None:
+        if self.stop_time is None:
             self.stop_time = datetime.now()
 
     def start_stop(self):
@@ -41,12 +42,14 @@ class Timer(object):
         else:
             self.start()
 
+
 class StopWatch(Desklet):
+
     def __init__(self):
         super(StopWatch, self).__init__()
         self.timer = Timer()
         self.timeout_handle = None
-        
+
     def on_timeout(self):
         self.queue_draw()
         return True
@@ -74,8 +77,8 @@ class StopWatch(Desklet):
     def on_draw(self, cr, now):
         t = self.timer.get_time()
 
-        time    = "%02d:%02d" % (t.seconds/(60*60), (t.seconds%(60*60))/60)
-        seconds = "%02d'%02d" % (t.seconds%60, t.microseconds/10000)
+        time = "%02d:%02d" % (t.seconds / (60 * 60), (t.seconds % (60 * 60)) / 60)
+        seconds = "%02d'%02d" % (t.seconds % 60, t.microseconds / 10000)
 
         cr.select_font_face(self.style.font, self.style.font_slant, self.style.font_weight)
 
@@ -85,13 +88,13 @@ class StopWatch(Desklet):
         cr.move_to(0, 0)
         cr.show_text("Stopwatch:")
 
-        cr.set_font_size(192/2)
+        cr.set_font_size(192 / 2)
         cr.move_to(0, 0 + 86)
         cr.show_text(time)
 
         xbearing, ybearing, width, height, xadvance, yadvance = cr.text_extents(time)
 
-        cr.set_font_size(192/2 * 0.6)
+        cr.set_font_size(192 / 2 * 0.6)
         cr.move_to(0 + width + 16, 0 + 86)
         cr.show_text(seconds)
 

@@ -1,14 +1,14 @@
-import cairo
+from ..desklet import Desklet
 
-from ..desklet import *
 
 class DigitalClock(Desklet):
+
     def __init__(self):
         super(DigitalClock, self).__init__()
 
     def on_draw(self, cr, now):
-        date    = now.strftime("%A, %d. %B %Y")
-        time    = now.strftime("%H:%M")
+        date = now.strftime("%A, %d. %B %Y")
+        time = now.strftime("%H:%M")
         seconds = now.strftime("%S")
 
         cr.select_font_face(self.style.font, self.style.font_slant, self.style.font_weight)
