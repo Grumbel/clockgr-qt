@@ -10,7 +10,8 @@ from PyQt5.QtWidgets import (QGraphicsScene, QMainWindow, QWidget,
                              QGraphicsItemGroup, QGraphicsRectItem,
                              QGraphicsEllipseItem, QGraphicsLineItem)
 
-from clockgrqt.analogclock import AnalogClock
+from clockgrqt.analog_clock import AnalogClock
+from clockgrqt.digital_clock import DigitalClock
 
 
 class MainWindow(QMainWindow):
@@ -38,15 +39,20 @@ class MainWindow(QMainWindow):
         self.clock.update(datetime.now())
         self.scene.addItem(self.clock.get_item())
 
+        self.digital_clock = DigitalClock()
+        self.digital_clock.update(datetime.now())
+        self.scene.addItem(self.digital_clock.get_item())
+
         self.timer = QTimer()
         self.timer.setInterval(500)
         self.timer.timeout.connect(self.my_update)
         self.timer.start()
 
-        self.setFixedSize(640, 640)
+        self.setFixedSize(1200, 900)
 
     def my_update(self, *args):
         self.clock.update(datetime.now())
+        self.digital_clock.update(datetime.now())
 
     def closeEvent(self, event):
         event.accept()
