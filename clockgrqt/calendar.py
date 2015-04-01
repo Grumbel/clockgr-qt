@@ -14,17 +14,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import math
-from datetime import datetime, timedelta
-from PyQt5.Qt import Qt
-from PyQt5.QtGui import QPen, QBrush, QColor, QPainter, QFont, QFontMetrics
-from PyQt5.QtCore import QRect, QTimer
-from PyQt5.QtWidgets import (QGraphicsScene, QMainWindow, QWidget,
-                             QVBoxLayout, QGraphicsView, QApplication,
-                             QGraphicsItemGroup, QGraphicsRectItem,
-                             QGraphicsEllipseItem, QGraphicsLineItem,
-                             QGraphicsSimpleTextItem)
 
+from datetime import datetime, timedelta
+from PyQt5.QtGui import QBrush, QColor, QFont, QFontMetrics
+from PyQt5.QtWidgets import (QGraphicsRectItem, QGraphicsLineItem,
+                             QGraphicsSimpleTextItem)
 from .desklet import Desklet
 
 
@@ -98,7 +92,7 @@ class CalendarDesklet(Desklet):
 
     def _draw_header(self):
         # Print "July 2013" header
-        brush = QBrush(QColor.fromRgbF(0.75, 0.75, 0.75))
+        # brush = QBrush(QColor.fromRgbF(0.75, 0.75, 0.75))
         font = QFont("Arial", 48, -1, False)
 
         self.header_text = QGraphicsSimpleTextItem(self.root)
@@ -106,7 +100,7 @@ class CalendarDesklet(Desklet):
 
     def _draw_weekdays(self, pos_x, pos_y):
         # cr.set_source_rgb(*self.style.foreground_color)
-        brush = QBrush(QColor.fromRgbF(0.75, 0.75, 0.75))
+        # brush = QBrush(QColor.fromRgbF(0.75, 0.75, 0.75))
         font = QFont("Arial", 26, -1, False)
         fm = QFontMetrics(font)
         days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
@@ -157,7 +151,6 @@ class CalendarDesklet(Desklet):
 
                 fm = QFontMetrics(font)
                 width = fm.width(s)
-                heigth = fm.height()
 
                 text = QGraphicsSimpleTextItem(self.root)
                 text.setPos(pos_x + x * self.cell_width - width / 2 + self.cell_width / 2.0,

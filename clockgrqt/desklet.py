@@ -21,6 +21,7 @@ from PyQt5.QtWidgets import (QGraphicsItemGroup, QGraphicsRectItem)
 
 from .style import Style
 
+
 class Desklet(object):
 
     def __init__(self):

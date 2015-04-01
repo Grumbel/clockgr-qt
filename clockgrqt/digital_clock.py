@@ -15,16 +15,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-import math
-from datetime import datetime
-from PyQt5.Qt import Qt
-from PyQt5.QtGui import QPen, QBrush, QColor, QPainter, QFont
-from PyQt5.QtCore import QRectF, QTimer
-from PyQt5.QtWidgets import (QGraphicsScene, QMainWindow, QWidget,
-                             QVBoxLayout, QGraphicsView, QApplication,
-                             QGraphicsItemGroup, QGraphicsRectItem,
-                             QGraphicsEllipseItem, QGraphicsLineItem,
-                             QGraphicsSimpleTextItem)
+from PyQt5.QtGui import QFont
+from PyQt5.QtWidgets import QGraphicsSimpleTextItem
 
 from .desklet import Desklet
 
