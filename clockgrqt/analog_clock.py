@@ -1,3 +1,19 @@
+# clockgr - A fullscreen clock for Qt
+# Copyright (C) 2015 Ingo Ruhnke <grumbel@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import math
 from datetime import datetime
 from PyQt5.QtGui import QPen, QBrush, QColor, QPainter
@@ -8,92 +24,95 @@ from PyQt5.QtWidgets import (QGraphicsScene, QMainWindow, QWidget,
                              QGraphicsEllipseItem, QGraphicsLineItem)
 from PyQt5.Qt import Qt
 
+from .desklet import Desklet
 
-class AnalogClock:
 
-    def get_item(self):
-        return self.group
+class AnalogClock(Desklet):
 
     def __init__(self):
         super().__init__()
 
-        self.width = 512
-        self.height = 512
+        self.center_x = 0
+        self.center_y = 0
+        self.radius = 1
 
-        self.pen = QPen()
-        self.pen.setWidth(6)
-        self.no_pen = QPen(Qt.NoPen)
-        self.brush = QBrush(QColor(255, 0, 0))
+        self.hours_hand = None
+        self.minutes_hand = None
+        self.seconds_hand = None
 
-        self.group = QGraphicsItemGroup()
+        self.hand_circle = None
 
-        self.center_x = self.width / 2.0
-        self.center_y = self.height / 2.0
-        self.radius = min(self.width, self.height) / 2.0 - 3.0
+    def set_style(self, style):
+        super().set_style(style)
 
-        center_x = self.center_x
-        center_y = self.center_y
-        radius = self.radius
+    def set_rect(self, rect):
+        super().set_rect(rect)
 
-        # self.pen.setColor(QColor(*self.style.foreground_color))
-        self.pen.setWidth(6)
-        circle = QGraphicsEllipseItem(center_x - radius,
-                                      center_y - radius,
-                                      2 * radius,
-                                      2 * radius,
-                                      self.group)
-        circle.setPen(self.pen)
+        self.center_x = self.rect.left() + self.rect.width() / 2.0
+        self.center_y = self.rect.top() + self.rect.height() / 2.0
+        self.radius = min(self.rect.width(), self.rect.height()) / 2.0 - 3.0
 
-        # cr.set_source_rgb(*self.style.midcolor)
+        pen = QPen(self.style.foreground_color)
+        pen.setWidth(6)
+        circle = QGraphicsEllipseItem(self.center_x - self.radius,
+                                      self.center_y - self.radius,
+                                      2 * self.radius,
+                                      2 * self.radius,
+                                      self.root)
+        circle.setPen(pen)
+
+        pen.setColor(self.style.midcolor)
         # cr.set_line_cap(cairo.LINE_CAP_ROUND)
-        self.pen.setCapStyle(Qt.RoundCap)
+        pen.setCapStyle(Qt.RoundCap)
         for i in range(0, 60):
             angle = i * 2.0 * math.pi / 60.0
             if i % 5 == 0:
                 line = QGraphicsLineItem(
-                    center_x + math.cos(angle) * radius * 0.85,
-                    center_y + math.sin(angle) * radius * 0.85,
-                    center_x + math.cos(angle) * radius * 0.95,
-                    center_y + math.sin(angle) * radius * 0.95,
-                    self.group)
-                self.pen.setColor(QColor(0, 0, 0))
-                self.pen.setWidth(6)
-                line.setPen(self.pen)
+                    self.center_x + math.cos(angle) * self.radius * 0.85,
+                    self.center_y + math.sin(angle) * self.radius * 0.85,
+                    self.center_x + math.cos(angle) * self.radius * 0.95,
+                    self.center_y + math.sin(angle) * self.radius * 0.95,
+                    self.root)
+                pen.setColor(QColor(0, 0, 0))
+                pen.setWidth(6)
+                line.setPen(pen)
             else:
                 line = QGraphicsLineItem(
-                    center_x + math.cos(angle) * radius * 0.90,
-                    center_y + math.sin(angle) * radius * 0.90,
-                    center_x + math.cos(angle) * radius * 0.95,
-                    center_y + math.sin(angle) * radius * 0.95,
-                    self.group)
-                self.pen.setColor(QColor(127, 127, 127))
-                self.pen.setWidth(4.0)
-                line.setPen(self.pen)
+                    self.center_x + math.cos(angle) * self.radius * 0.90,
+                    self.center_y + math.sin(angle) * self.radius * 0.90,
+                    self.center_x + math.cos(angle) * self.radius * 0.95,
+                    self.center_y + math.sin(angle) * self.radius * 0.95,
+                    self.root)
+                pen.setColor(QColor(127, 127, 127))
+                pen.setWidth(4.0)
+                line.setPen(pen)
 
         # hour
-        self.pen.setColor(QColor(0, 0, 0)) # cr.set_source_rgb(*self.style.foreground_color)
-        self.pen.setWidth(16)
-        self.pen.setCapStyle(Qt.RoundCap)
-        self.hours_hand = QGraphicsLineItem(self.group)
-        self.hours_hand.setPen(self.pen)
+        pen = QPen(self.style.foreground_color)
+        pen.setWidth(16)
+        pen.setCapStyle(Qt.RoundCap)
+        self.hours_hand = QGraphicsLineItem(self.root)
+        self.hours_hand.setPen(pen)
 
         # minute
-        self.pen.setColor(QColor(0, 0, 0)) # cr.set_source_rgb(*self.style.foreground_color)
-        self.pen.setWidth(12)
-        self.pen.setCapStyle(Qt.RoundCap)
-        self.minutes_hand = QGraphicsLineItem(self.group)
-        self.minutes_hand.setPen(self.pen)
+        pen = QPen(self.style.foreground_color)
+        pen.setWidth(12)
+        pen.setCapStyle(Qt.RoundCap)
+        self.minutes_hand = QGraphicsLineItem(self.root)
+        self.minutes_hand.setPen(pen)
 
         # second
-        self.pen.setColor(QColor(127, 127, 127)) # cr.set_source_rgb(*self.style.midcolor)
-        self.pen.setWidth(4)
-        self.pen.setCapStyle(Qt.RoundCap)
-        self.seconds_hand = QGraphicsLineItem(self.group)
-        self.seconds_hand.setPen(self.pen)
+        pen = QPen(self.style.midcolor)
+        pen.setWidth(4)
+        pen.setCapStyle(Qt.RoundCap)
+        self.seconds_hand = QGraphicsLineItem(self.root)
+        self.seconds_hand.setPen(pen)
 
-        self.brush.setColor(QColor(255, 255, 255)) # cr.set_source_rgb(*self.style.background_color)
-        circle = QGraphicsEllipseItem(center_x - 5, center_y - 5, 10, 10, self.group)
-        circle.setBrush(self.brush)
+        self.hand_circle = QGraphicsEllipseItem(self.center_x - 5,
+                                      self.center_y - 5,
+                                      10, 10,
+                                      self.root)
+        self.hand_circle.setBrush(QBrush(self.style.background_color))
 
     def update(self, now):
         hour = (now.hour / 12.0 + now.minute / 60.0 / 12.0) * 2.0 * math.pi - math.pi / 2.0

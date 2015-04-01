@@ -1,28 +1,42 @@
+# clockgr - A fullscreen clock for Qt
+# Copyright (C) 2015 Ingo Ruhnke <grumbel@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
 import math
 from datetime import datetime
+from PyQt5.Qt import Qt
 from PyQt5.QtGui import QPen, QBrush, QColor, QPainter, QFont
-from PyQt5.QtCore import QRect, QTimer
+from PyQt5.QtCore import QRectF, QTimer
 from PyQt5.QtWidgets import (QGraphicsScene, QMainWindow, QWidget,
                              QVBoxLayout, QGraphicsView, QApplication,
                              QGraphicsItemGroup, QGraphicsRectItem,
                              QGraphicsEllipseItem, QGraphicsLineItem,
                              QGraphicsSimpleTextItem)
-from PyQt5.Qt import Qt
+
+from .desklet import Desklet
 
 
-class DigitalClock:
-
-    def get_item(self):
-        return self.group
+class DigitalClock(Desklet):
 
     def __init__(self):
         super().__init__()
 
-        self.group = QGraphicsItemGroup()
-
-        self.seconds = QGraphicsSimpleTextItem("00", self.group)
-        self.time = QGraphicsSimpleTextItem("00:00", self.group)
-        self.date = QGraphicsSimpleTextItem("  ", self.group)
+        self.seconds = QGraphicsSimpleTextItem("00", self.root)
+        self.time = QGraphicsSimpleTextItem("00:00", self.root)
+        self.date = QGraphicsSimpleTextItem("  ", self.root)
 
         # pen = QPen(QColor(255, 0, 0))
         # pen.setWidth(6)

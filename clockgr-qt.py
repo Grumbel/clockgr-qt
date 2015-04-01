@@ -1,10 +1,27 @@
 #!/usr/bin/env python3
 
+# clockgr - A fullscreen clock for Qt
+# Copyright (C) 2015 Ingo Ruhnke <grumbel@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
 import sys
 from datetime import datetime
 from PyQt5.Qt import Qt
 from PyQt5.QtGui import QPen, QBrush, QColor, QPainter
-from PyQt5.QtCore import QRect, QTimer
+from PyQt5.QtCore import QRectF, QTimer
 from PyQt5.QtWidgets import (QGraphicsScene, QMainWindow, QWidget,
                              QVBoxLayout, QGraphicsView, QApplication,
                              QGraphicsItemGroup, QGraphicsRectItem,
@@ -36,28 +53,34 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(central)
         self.show()
 
-        self.clock = AnalogClock()
-        self.clock.update(datetime.now())
-        self.scene.addItem(self.clock.get_item())
+        self.analog_clock = AnalogClock()
+        self.analog_clock.set_rect(QRectF(900 - 256, 32, 512, 512))
+        self.analog_clock.update(datetime.now())
+        self.scene.addItem(self.analog_clock.root)
 
         self.digital_clock = DigitalClock()
+        self.digital_clock.set_rect(QRectF(32, 670, 640, 200))
         self.digital_clock.update(datetime.now())
-        self.scene.addItem(self.digital_clock.get_item())
+        self.scene.addItem(self.digital_clock.root)
 
         self.calendar = CalendarDesklet()
+        self.calendar.set_rect(QRectF(32, 32, 512, 412))
         self.calendar.update(datetime.now())
-        self.scene.addItem(self.calendar.get_item())
-        self.calendar.get_item().setPos(-400, 0)
+        self.scene.addItem(self.calendar.root)
+        # self.calendar.root.setPos(-400, 0)
 
         self.timer = QTimer()
         self.timer.setInterval(500)
         self.timer.timeout.connect(self.my_update)
         self.timer.start()
 
+        # self.world = self.add_desklet(WorldDesklet(),    (1200 - 540 - 32, 900 - 276 - 32, 540, 276))
+        # self.stopwatch = self.add_desklet(StopWatch(),       (32, 64, 500, 180))
+
         self.setFixedSize(1200, 900)
 
     def my_update(self, *args):
-        self.clock.update(datetime.now())
+        self.analog_clock.update(datetime.now())
         self.digital_clock.update(datetime.now())
 
     def closeEvent(self, event):

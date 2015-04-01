@@ -1,3 +1,19 @@
+# clockgr - A fullscreen clock for Qt
+# Copyright (C) 2015 Ingo Ruhnke <grumbel@gmail.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 import math
 from datetime import datetime, timedelta
 from PyQt5.Qt import Qt
@@ -9,18 +25,19 @@ from PyQt5.QtWidgets import (QGraphicsScene, QMainWindow, QWidget,
                              QGraphicsEllipseItem, QGraphicsLineItem,
                              QGraphicsSimpleTextItem)
 
+from .desklet import Desklet
 
-class CalendarDesklet:
+
+class CalendarDesklet(Desklet):
 
     def __init__(self):
         super().__init__()
+
         self.calendar_offset = 0
-        self.width = 512
-        self.height = 512
         self.build_scene()
 
-    def get_item(self):
-        return self.group
+    def set_rect(self, rect):
+        super().set_rect(rect)
 
     def next_month(self):
         self.calendar_offset += 1
@@ -43,21 +60,19 @@ class CalendarDesklet:
 
         fm = QFontMetrics(self.header_text.font())
         rect = fm.boundingRect(s)
-        self.header_text.setPos(pos_x + self.width / 2 - rect.width() / 2, pos_y)
+        self.header_text.setPos(pos_x + self.rect.width() / 2 - rect.width() / 2, pos_y)
         self.header_text.setText(s)
 
         # update days
 
     def build_scene(self):
-        self.group = QGraphicsItemGroup()
-
         # cr.select_font_face(self.style.font, self.style.font_slant, self.style.font_weight)
 
         pos_x = 0
         pos_y = 0
 
-        self.cell_width = (self.width) / 7.0
-        self.cell_height = (self.height - 64) / 7.0
+        self.cell_width = (self.rect.width()) / 7.0
+        self.cell_height = (self.rect.height() - 64) / 7.0
 
         now = datetime.now()
         year = now.year
@@ -86,7 +101,7 @@ class CalendarDesklet:
         brush = QBrush(QColor.fromRgbF(0.75, 0.75, 0.75))
         font = QFont("Arial", 48, -1, False)
 
-        self.header_text = QGraphicsSimpleTextItem(self.group)
+        self.header_text = QGraphicsSimpleTextItem(self.root)
         self.header_text.setFont(font)
 
     def _draw_weekdays(self, pos_x, pos_y):
@@ -97,16 +112,16 @@ class CalendarDesklet:
         days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
         for x, day in enumerate(days):
             # xbearing, ybearing, width, height, xadvance, yadvance = cr.text_extents(days[x])
-            text = QGraphicsSimpleTextItem(self.group)
+            text = QGraphicsSimpleTextItem(self.root)
             rect = fm.boundingRect(day)
             text.setPos(pos_x + x * self.cell_width - rect.width() / 2 + self.cell_width / 2.0,
                         pos_y + 32 + 0 * self.cell_height)
             text.setFont(font)
             text.setText(day)
 
-        line = QGraphicsLineItem(self.group)
+        line = QGraphicsLineItem(self.root)
         line.setLine(pos_x + 3, pos_y + fm.height() * 2,
-                     pos_x + self.width - 3, pos_y + fm.height() * 2)
+                     pos_x + self.rect.width() - 3, pos_y + fm.height() * 2)
 
         # cr.select_font_face(self.style.font, self.style.font_slant, self.style.font_weight)
 
@@ -125,11 +140,13 @@ class CalendarDesklet:
                         # cr.set_source_rgb(*self.style.foreground_color)
                         brush = QBrush(QColor.fromRgbF(1, 1, 1))
 
-                        rect = QGraphicsRectItem(pos_x + x * self.cell_width - self.cell_width / 2 + self.cell_width / 2.0,
-                                                 pos_y + 32 + self.cell_height + y * self.cell_height - self.cell_height / 2 - 10,
-                                                 self.cell_width, self.cell_height,
-                                                 self.group)
-                        # cr.fill()
+                        rect = QGraphicsRectItem(
+                            pos_x + x * self.cell_width - self.cell_width / 2 + self.cell_width / 2.0,
+                            pos_y + 32 + self.cell_height + y *
+                            self.cell_height - self.cell_height / 2 - 10,
+                            self.cell_width, self.cell_height,
+                            self.root)
+                        rect.setBrush(brush)
                         # cr.set_source_rgb(*self.style.background_color)
                         brush = QBrush(QColor.fromRgbF(0, 0, 0))
                         # cr.select_font_face(self.style.font, self.style.font_slant, self.style.font_weight)
@@ -142,7 +159,7 @@ class CalendarDesklet:
                 width = fm.width(s)
                 heigth = fm.height()
 
-                text = QGraphicsSimpleTextItem(self.group)
+                text = QGraphicsSimpleTextItem(self.root)
                 text.setPos(pos_x + x * self.cell_width - width / 2 + self.cell_width / 2.0,
                             pos_y + 32 + self.cell_height + y * self.cell_height)
                 text.setText(s)

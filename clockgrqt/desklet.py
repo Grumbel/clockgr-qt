@@ -14,34 +14,29 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-SOURCES := $(wildcard \
-  clockgrqt/*.py \
-  clockgr/*.py \
-  clockgr/desklets/*.py)
 
-all: autopep flake test
+from PyQt5.QtCore import QRectF
+from PyQt5.QtGui import QPen, QColor
+from PyQt5.QtWidgets import (QGraphicsItemGroup, QGraphicsRectItem)
 
-autopep:
-	autopep8  --max-line=120  --in-place $(SOURCES)
+from .style import Style
 
-test:
-	python2 -m unittest discover -s tests/
+class Desklet(object):
 
-flake:
-	python2 -m flake8.run --max-line-length=120 $(SOURCES)
+    def __init__(self):
+        self.rect = QRectF()
+        self.style = Style()
+        self.root = QGraphicsItemGroup()
 
-PYLINT_TARGETS := $(addprefix .pylint/, $(SOURCES))
+        self.debug_rect = QGraphicsRectItem(self.root)
+        self.debug_rect.setPen(QPen(QColor(255, 0, 0)))
 
-$(PYLINT_TARGETS): .pylint/%.py: %.py
-	mkdir -p $(dir $@)
-	PYTHONPATH=. epylint $<
-	touch $@
+    def set_style(self, style):
+        self.style = style
 
-pylint: $(PYLINT_TARGETS)
-
-clean:
-	rm -vrf .pylint/
-
-.PHONY: autopep test flake pylint clean
+    def set_rect(self, rect):
+        self.rect = rect
+        if self.debug_rect:
+            self.debug_rect.setRect(rect)
 
 # EOF #

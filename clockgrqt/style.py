@@ -14,34 +14,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-SOURCES := $(wildcard \
-  clockgrqt/*.py \
-  clockgr/*.py \
-  clockgr/desklets/*.py)
 
-all: autopep flake test
+from PyQt5.QtGui import QFont, QColor
 
-autopep:
-	autopep8  --max-line=120  --in-place $(SOURCES)
 
-test:
-	python2 -m unittest discover -s tests/
+class Style:
 
-flake:
-	python2 -m flake8.run --max-line-length=120 $(SOURCES)
+    def __init__(self):
+        self.font = QFont("DejaVu Sans")
 
-PYLINT_TARGETS := $(addprefix .pylint/, $(SOURCES))
+        self.background_color = QColor.fromRgbF(1.0, 1.0, 1.0)
+        self.midcolor = QColor.fromRgbF(0.5, 0.5, 0.5)
+        self.foreground_color = QColor.fromRgbF(0, 0, 0)
 
-$(PYLINT_TARGETS): .pylint/%.py: %.py
-	mkdir -p $(dir $@)
-	PYTHONPATH=. epylint $<
-	touch $@
-
-pylint: $(PYLINT_TARGETS)
-
-clean:
-	rm -vrf .pylint/
-
-.PHONY: autopep test flake pylint clean
 
 # EOF #
