@@ -12,6 +12,7 @@ from PyQt5.QtWidgets import (QGraphicsScene, QMainWindow, QWidget,
 
 from clockgrqt.analog_clock import AnalogClock
 from clockgrqt.digital_clock import DigitalClock
+from clockgrqt.calendar import CalendarDesklet
 
 
 class MainWindow(QMainWindow):
@@ -42,6 +43,11 @@ class MainWindow(QMainWindow):
         self.digital_clock = DigitalClock()
         self.digital_clock.update(datetime.now())
         self.scene.addItem(self.digital_clock.get_item())
+
+        self.calendar = CalendarDesklet()
+        self.calendar.update(datetime.now())
+        self.scene.addItem(self.calendar.get_item())
+        self.calendar.get_item().setPos(-400, 0)
 
         self.timer = QTimer()
         self.timer.setInterval(500)
