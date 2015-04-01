@@ -30,6 +30,7 @@ from PyQt5.QtWidgets import (QGraphicsScene, QMainWindow, QWidget,
 from clockgrqt.analog_clock import AnalogClock
 from clockgrqt.digital_clock import DigitalClock
 from clockgrqt.calendar import CalendarDesklet
+from clockgrqt.style import Style
 
 
 class MainWindow(QMainWindow):
@@ -53,18 +54,23 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(central)
         self.show()
 
+        style = Style()
+
         self.analog_clock = AnalogClock()
         self.analog_clock.set_rect(QRectF(900 - 256, 32, 512, 512))
-        self.analog_clock.update(datetime.now())
+        self.analog_clock.set_style(style)
+        self.analog_clock.set_time(datetime.now())
         self.scene.addItem(self.analog_clock.root)
 
         self.digital_clock = DigitalClock()
         self.digital_clock.set_rect(QRectF(32, 670, 640, 200))
+        self.digital_clock.set_style(style)
         self.digital_clock.update(datetime.now())
         self.scene.addItem(self.digital_clock.root)
 
         self.calendar = CalendarDesklet()
         self.calendar.set_rect(QRectF(32, 32, 512, 412))
+        self.calendar.set_style(style)
         self.calendar.update(datetime.now())
         self.scene.addItem(self.calendar.root)
         # self.calendar.root.setPos(-400, 0)
@@ -80,8 +86,9 @@ class MainWindow(QMainWindow):
         self.setFixedSize(1200, 900)
 
     def my_update(self, *args):
-        self.analog_clock.update(datetime.now())
-        self.digital_clock.update(datetime.now())
+        now = datetime.now()
+        self.analog_clock.set_time(now)
+        self.digital_clock.update(now)
 
     def closeEvent(self, event):
         event.accept()
