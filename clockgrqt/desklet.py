@@ -29,15 +29,14 @@ class Desklet(object):
         self.style = Style()
         self.root = QGraphicsItemGroup()
 
-        self.debug_rect = QGraphicsRectItem(self.root)
-        self.debug_rect.setPen(QPen(QColor(255, 0, 0)))
+        # self.debug_rect = QGraphicsRectItem(self.root)
+        # self.debug_rect.setPen(QPen(QColor(255, 0, 0)))
 
     def set_style(self, style):
         self.style = style
 
     def set_rect(self, rect):
         self.rect = rect
-        if self.debug_rect:
-            self.debug_rect.setRect(rect)
+
 
 # EOF #

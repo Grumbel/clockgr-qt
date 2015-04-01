@@ -20,7 +20,7 @@
 import sys
 from datetime import datetime
 from PyQt5.Qt import Qt
-from PyQt5.QtGui import QPen, QBrush, QColor, QPainter
+from PyQt5.QtGui import QPen, QBrush, QColor, QPainter, QPixmap
 from PyQt5.QtCore import QRectF, QTimer
 from PyQt5.QtWidgets import (QGraphicsScene, QMainWindow, QWidget,
                              QVBoxLayout, QGraphicsView, QApplication,
@@ -42,6 +42,8 @@ class MainWindow(QMainWindow):
 
         self.graphics_view = QGraphicsView(central)
         self.graphics_view.setRenderHints(QPainter.Antialiasing | QPainter.SmoothPixmapTransform)
+        self.graphics_view.centerOn(1200/2, 900/2)
+
         self.scene = QGraphicsScene()
 
         self.graphics_view.setScene(self.scene)
@@ -55,6 +57,9 @@ class MainWindow(QMainWindow):
         self.show()
 
         style = Style()
+
+        world = self.scene.addPixmap(QPixmap("world_g.png"))
+        world.setPos(1200 - 540 - 32, 900 - 276 - 32)
 
         self.analog_clock = AnalogClock()
         self.analog_clock.set_rect(QRectF(900 - 256, 32, 512, 512))
@@ -70,6 +75,8 @@ class MainWindow(QMainWindow):
         self.scene.addItem(self.digital_clock.root)
 
         self.calendar = CalendarDesklet()
+        self.calendar.update(datetime.now())
+        self.calendar.set_style(style)
         self.calendar.set_rect(QRectF(32, 32, 512, 412))
         self.calendar.set_style(style)
         self.calendar.update(datetime.now())
