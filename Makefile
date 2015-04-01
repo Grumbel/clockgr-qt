@@ -19,7 +19,9 @@ SOURCES := $(wildcard \
   clockgr/*.py \
   clockgr/desklets/*.py)
 
-all: autopep flake test
+default: flake test
+
+all: autopep flake test pylint
 
 autopep:
 	autopep8  --max-line=120  --in-place $(SOURCES)
@@ -42,6 +44,6 @@ pylint: $(PYLINT_TARGETS)
 clean:
 	rm -vrf .pylint/
 
-.PHONY: autopep test flake pylint clean
+.PHONY: autopep test flake pylint clean all default
 
 # EOF #
