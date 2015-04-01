@@ -65,6 +65,7 @@ class MainWindow(QMainWindow):
         self.digital_clock = DigitalClock()
         self.digital_clock.set_rect(QRectF(32, 670, 640, 200))
         self.digital_clock.set_style(style)
+        self.digital_clock.set_rect(QRectF(32, 670, 640, 200))
         self.digital_clock.update(datetime.now())
         self.scene.addItem(self.digital_clock.root)
 
