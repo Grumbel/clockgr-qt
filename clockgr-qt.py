@@ -30,6 +30,7 @@ from PyQt5.QtWidgets import (QGraphicsScene, QMainWindow, QWidget,
 from clockgrqt.analog_clock import AnalogClock
 from clockgrqt.digital_clock import DigitalClock
 from clockgrqt.calendar import CalendarDesklet
+from clockgrqt.stop_watch import StopWatch
 from clockgrqt.style import Style
 
 
@@ -89,13 +90,20 @@ class MainWindow(QMainWindow):
         self.calendar.update(datetime.now())
         self.scene.addItem(self.calendar.root)
 
+        self.stop_watch = StopWatch()
+        self.stop_watch.set_rect(QRectF(32, 480, 512, 120))
+        self.stop_watch.set_style(style)
+        self.stop_watch.set_rect(QRectF(32, 480, 512, 120))
+        self.stop_watch.set_style(style)
+        self.scene.addItem(self.stop_watch.root)
+
         self.timer = QTimer()
         self.timer.setInterval(500)
         self.timer.timeout.connect(self.my_update)
         self.timer.start()
 
-        # self.world = self.add_desklet(WorldDesklet(),    (1200 - 540 - 32, 900 - 276 - 32, 540, 276))
-        # self.stopwatch = self.add_desklet(StopWatch(),       (32, 64, 500, 180))
+        # self.world = self.add_desklet(WorldDesklet(), (1200 - 540 - 32, 900 - 276 - 32, 540, 276))
+        # self.stopwatch = self.add_desklet(StopWatch(), (32, 64, 500, 180))
 
         self.setMinimumSize(1200, 900)
 
@@ -129,6 +137,10 @@ class MainWindow(QMainWindow):
 
         if ev.key() == Qt.Key_Escape:
             QApplication.instance().quit()
+        elif ev.key() == Qt.Key_Space:
+            self.stop_watch.start_stop_watch()
+        elif ev.key() == Qt.Key_Return:
+            self.stop_watch.clear_stop_watch()
         elif ev.key() == Qt.Key_I:
             self.invert()
         elif ev.key() == Qt.Key_F or ev.key() == Qt.Key_F11:
