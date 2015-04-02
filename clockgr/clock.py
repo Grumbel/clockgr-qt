@@ -73,11 +73,11 @@ class ClockRenderer(object):
         self.desklets = []
         self.active_desklets = []
 
-        self.digital_clock = self.add_desklet(DigitalClock(),    (32, 670, 640, 200))
-        self.analog_clock = self.add_desklet(AnalogClock(),     (900 - 256, 32, 512, 512))
+        self.digital_clock = self.add_desklet(DigitalClock(), (32, 670, 640, 200))
+        self.analog_clock = self.add_desklet(AnalogClock(), (900 - 256, 32, 512, 512))
         self.calendar = self.add_desklet(CalendarDesklet(), (32, 32, 512, 412))
-        self.world = self.add_desklet(WorldDesklet(),    (1200 - 540 - 32, 900 - 276 - 32, 540, 276))
-        self.stopwatch = self.add_desklet(StopWatch(),       (32, 64, 500, 180))
+        self.world = self.add_desklet(WorldDesklet(), (1200 - 540 - 32, 900 - 276 - 32, 540, 276))
+        self.stopwatch = self.add_desklet(StopWatch(), (32, 64, 500, 180))
 
         self.mode = ClockMode.calendar
         self.apply_mode()

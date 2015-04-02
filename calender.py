@@ -47,10 +47,10 @@ def Calender(Desklet):
         days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
         for x in range(0,7):
                 xbearing, ybearing, width, height, xadvance, yadvance = cr.text_extents(days[x])
-                cr.move_to(x_pos + x * cell_width - width/2, 
+                cr.move_to(x_pos + x * cell_width - width/2,
                            y_pos + 32 + 0 * cell_height)
                 cr.show_text(days[x])
-            
+
         cr.move_to(x_pos - cell_width/2,   y_pos + height*2)
         cr.line_to(x_pos + cell_width * 6.5, y_pos + height*2)
         cr.stroke()
@@ -61,15 +61,15 @@ def Calender(Desklet):
         for y in range(0,6):
             for x in range(0,7):
                 s = "%d" % today.day
-                                
+
                 if today.month != month:
                     cr.set_source_rgb(0.75, 0.75, 0.75)
                 else:
                     if today.day == now.day and today.month == now.month and self.calendar_offset == 0:
                         # cr.set_source_rgb(*foreground_color)
                         cr.set_source_rgb(*foreground_color)
-                        cr.rectangle(x_pos + x * cell_width - cell_width/2, 
-                                     y_pos + 32 + cell_height + y * cell_height - cell_height/2 - 10, 
+                        cr.rectangle(x_pos + x * cell_width - cell_width/2,
+                                     y_pos + 32 + cell_height + y * cell_height - cell_height/2 - 10,
                                      cell_width, cell_height)
                         cr.fill()
                         cr.set_source_rgb(*background_color)
@@ -83,7 +83,7 @@ def Calender(Desklet):
 
                 xbearing, ybearing, width, height, xadvance, yadvance = cr.text_extents(s)
 
-                cr.move_to(x_pos + x * cell_width - width/2, 
+                cr.move_to(x_pos + x * cell_width - width/2,
                            y_pos + 32 + cell_height + y * cell_height)
                 # now.day, now.month
                 # now.weekday()
