@@ -24,7 +24,7 @@ default: flake test
 all: autopep flake test pylint
 
 autopep:
-	autopep8  --max-line=120  --in-place $(SOURCES)
+	autopep8 --max-line=120 --in-place --aggressive $(SOURCES)
 
 test:
 	python2 -m unittest discover -s tests/
