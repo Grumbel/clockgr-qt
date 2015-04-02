@@ -17,7 +17,7 @@
 
 from datetime import datetime, timedelta
 from PyQt5.Qt import Qt
-from PyQt5.QtGui import QPen, QBrush, QColor, QFont, QFontMetrics
+from PyQt5.QtGui import QPen, QFont, QFontMetrics
 from PyQt5.QtWidgets import (QGraphicsRectItem, QGraphicsLineItem,
                              QGraphicsSimpleTextItem)
 from .desklet import Desklet
@@ -37,7 +37,7 @@ class CalendarDesklet(Desklet):
 
         self.cursor = None
 
-        self.cursor_pos = (0, 0)
+        self.cursor_pos = None
         self.build_scene(datetime.now())
 
     def build_scene(self, now):
@@ -66,7 +66,7 @@ class CalendarDesklet(Desklet):
 
         # weekdays
         days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-        for x, day in enumerate(days):
+        for day in days:
             text = QGraphicsSimpleTextItem(self.root)
             text.setText(day)
             self.weekdays.append(text)
@@ -115,10 +115,14 @@ class CalendarDesklet(Desklet):
                           y + row * self.cell_height + self.cell_height / 2 - fm.height() / 2)
 
         # FIXME: mark current day
-        self.cursor.setRect(x + self.cursor_pos[0] * self.cell_width,
-                            y + self.cursor_pos[1] * self.cell_height,
-                            self.cell_width,
-                            self.cell_height)
+        if self.cursor_pos is not None:
+            self.cursor.setRect(x + self.cursor_pos[0] * self.cell_width,
+                                y + self.cursor_pos[1] * self.cell_height,
+                                self.cell_width,
+                                self.cell_height)
+            self.cursor.show()
+        else:
+            self.cursor.hide()
 
     def set_style(self, style):
         super().set_style(style)
@@ -136,13 +140,16 @@ class CalendarDesklet(Desklet):
         self.cursor.setBrush(style.foreground_color)
         self.cursor.setPen(QPen(Qt.NoPen))
 
+        for widget in self.weekdays:
+            widget.setBrush(style.foreground_color)
+
         for n, (day, widget) in enumerate(self.days):
             col = n % 7
             row = n // 7
             widget.setFont(font)
             if (col, row) == self.cursor_pos:
                 widget.setBrush(style.background_color)
-            elif day.month != self.now.month:
+            elif day.month != self.now.month:  # FIXME: doesn't take offset into account
                 widget.setBrush(style.midcolor)
             else:
                 widget.setBrush(style.foreground_color)
@@ -165,10 +172,25 @@ class CalendarDesklet(Desklet):
         month = now.month
         month += self.calendar_offset
 
+        while month < 1:
+            year -= 1
+            month += 12
+
+        while month > 12:
+            year += 1
+            month -= 12
+
         # update header
         s = datetime(year, month, 1).strftime("%B %Y")
 
         self.header.setText(s)
+
+        # Print calendar
+        start = datetime(year, month, 1)
+        start = start - timedelta(start.weekday())
+        today = start
+
+        self.cursor_pos = None
 
         # update days
         for n, (day, widget) in enumerate(self.days):
@@ -177,6 +199,13 @@ class CalendarDesklet(Desklet):
 
             if day.day == now.day and day.month == now.month and self.calendar_offset == 0:
                 self.cursor_pos = (col, row)
+
+            widget.setText("%d" % today.day)
+            self.days[n] = (today, widget)
+            today = today + timedelta(days=1)
+
+        self.set_style(self.style)
+        self.set_rect(self.rect)
 
 
 # EOF #

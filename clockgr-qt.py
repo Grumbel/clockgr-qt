@@ -38,6 +38,8 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
+        self.inverted = False
+
         central = QWidget()
 
         self.graphics_view = QGraphicsView(central)
@@ -97,6 +99,23 @@ class MainWindow(QMainWindow):
 
         self.setMinimumSize(1200, 900)
 
+    def invert(self):
+        if self.inverted:
+            style = Style()
+        else:
+            style = Style()
+            (style.background_color,
+             style.foreground_color) = \
+             (style.foreground_color,
+              style.background_color)
+
+        self.scene.setBackgroundBrush(style.background_color)
+        self.calendar.set_style(style)
+        self.digital_clock.set_style(style)
+        self.analog_clock.set_style(style)
+
+        self.inverted = not self.inverted
+
     def my_update(self, *args):
         now = datetime.now()
         self.analog_clock.set_time(now)
@@ -105,12 +124,34 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event):
         event.accept()
 
+    def keyPressEvent(self, ev):
+        # cursor keys are eaten up by the QGraphicsView
+
+        if ev.key() == Qt.Key_Escape:
+            QApplication.instance().quit()
+        elif ev.key() == Qt.Key_I:
+            self.invert()
+        elif ev.key() == Qt.Key_F or ev.key() == Qt.Key_F11:
+            if self.windowState() & Qt.WindowFullScreen:
+                self.showNormal()
+            else:
+                self.showFullScreen()
+        elif ev.key() == Qt.Key_1:
+            self.calendar.previous_month()
+        elif ev.key() == Qt.Key_2:
+            self.calendar.next_month()
+        else:
+            pass
+
 
 def main():
     app = QApplication(sys.argv)
     window = MainWindow()
+    app.exec()
 
-    QApplication.instance().exec()
+    # manually tear down the app, PyQt crashes otherwise
+    del window
+    del app
 
 
 if __name__ == "__main__":
