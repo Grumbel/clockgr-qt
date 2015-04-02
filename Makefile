@@ -44,6 +44,9 @@ pylint: $(PYLINT_TARGETS)
 clean:
 	rm -vrf .pylint/
 
-.PHONY: autopep test flake pylint clean all default
+run:
+	./clockgr-qt.py
+
+.PHONY: autopep test flake pylint clean all default run
 
 # EOF #
