@@ -16,7 +16,8 @@
 
 
 from datetime import datetime, timedelta
-from PyQt5.QtGui import QBrush, QColor, QFont, QFontMetrics
+from PyQt5.Qt import Qt
+from PyQt5.QtGui import QPen, QBrush, QColor, QFont, QFontMetrics
 from PyQt5.QtWidgets import (QGraphicsRectItem, QGraphicsLineItem,
                              QGraphicsSimpleTextItem)
 from .desklet import Desklet
@@ -28,13 +29,56 @@ class CalendarDesklet(Desklet):
         super().__init__()
 
         self.calendar_offset = 0
-        self.days = []
         self.weekdays = []
+        self.days = []  # [(daytime, widget), ...]
 
         self.header = None
         self.header_line = None
 
-        self.build_scene()
+        self.cursor = None
+
+        self.cursor_pos = (0, 0)
+        self.build_scene(datetime.now())
+
+    def build_scene(self, now):
+        year = now.year
+        month = now.month
+        month += self.calendar_offset
+
+        while month < 1:
+            year -= 1
+            month += 12
+
+        while month > 12:
+            year += 1
+            month -= 12
+
+        # Print calendar
+        start = datetime(year, month, 1)
+        start = start - timedelta(start.weekday())
+        today = start
+
+        # cursor
+        self.cursor = QGraphicsRectItem(self.root)
+
+        # header
+        self.header = QGraphicsSimpleTextItem(self.root)
+
+        # weekdays
+        days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+        for x, day in enumerate(days):
+            text = QGraphicsSimpleTextItem(self.root)
+            text.setText(day)
+            self.weekdays.append(text)
+
+        # line
+        self.header_line = QGraphicsLineItem(self.root)
+
+        for y in range(0, 6):
+            for x in range(0, 7):
+                widget = QGraphicsSimpleTextItem("%d" % today.day, self.root)
+                self.days.append((today, widget))
+                today = today + timedelta(days=1)
 
     def set_rect(self, rect):
         super().set_rect(rect)
@@ -62,13 +106,19 @@ class CalendarDesklet(Desklet):
         self.header_line.setLine(x, y,
                                  x + self.rect.width() - 3, y)
 
-        for n, day in enumerate(self.days):
-            row = n % 7
-            col = n // 7
+        for n, (day, widget) in enumerate(self.days):
+            col = n % 7
+            row = n // 7
 
-            rect = fm.boundingRect(day.text())
-            day.setPos(x + row * self.cell_width + self.cell_width / 2 - rect.width() / 2,
-                       y + col * self.cell_height + self.cell_height / 2 - fm.height() / 2)
+            rect = fm.boundingRect(widget.text())
+            widget.setPos(x + col * self.cell_width + self.cell_width / 2 - rect.width() / 2,
+                          y + row * self.cell_height + self.cell_height / 2 - fm.height() / 2)
+
+        # FIXME: mark current day
+        self.cursor.setRect(x + self.cursor_pos[0] * self.cell_width,
+                            y + self.cursor_pos[1] * self.cell_height,
+                            self.cell_width,
+                            self.cell_height)
 
     def set_style(self, style):
         super().set_style(style)
@@ -81,11 +131,24 @@ class CalendarDesklet(Desklet):
         font = QFont(style.font)
         font.setPixelSize(32)
 
-        for day in self.days:
-            day.setFont(font)
+        self.header_line.setPen(style.foreground_color)
 
-        for day in self.weekdays:
-            day.setFont(font)
+        self.cursor.setBrush(style.foreground_color)
+        self.cursor.setPen(QPen(Qt.NoPen))
+
+        for n, (day, widget) in enumerate(self.days):
+            col = n % 7
+            row = n // 7
+            widget.setFont(font)
+            if (col, row) == self.cursor_pos:
+                widget.setBrush(style.background_color)
+            elif day.month != self.now.month:
+                widget.setBrush(style.midcolor)
+            else:
+                widget.setBrush(style.foreground_color)
+
+        for widget in self.weekdays:
+            widget.setFont(font)
 
     def next_month(self):
         self.calendar_offset += 1
@@ -96,12 +159,11 @@ class CalendarDesklet(Desklet):
         self.update(datetime.now())
 
     def update(self, now):
+        self.now = now
+
         year = now.year
         month = now.month
         month += self.calendar_offset
-
-        pos_x = 0
-        pos_y = 0
 
         # update header
         s = datetime(year, month, 1).strftime("%B %Y")
@@ -109,101 +171,12 @@ class CalendarDesklet(Desklet):
         self.header.setText(s)
 
         # update days
+        for n, (day, widget) in enumerate(self.days):
+            col = n % 7
+            row = n // 7
 
-    def build_scene(self):
-        pos_x = 0
-        pos_y = 0
-
-        self.cell_width = (self.rect.width()) / 7.0
-        self.cell_height = (self.rect.height() - 64) / 7.0
-
-        now = datetime.now()
-        year = now.year
-        month = now.month
-        month += self.calendar_offset
-
-        while month < 1:
-            year -= 1
-            month += 12
-
-        while month > 12:
-            year += 1
-            month -= 12
-
-        # Print calendar
-        start = datetime(year, month, 1)
-        start = start - timedelta(start.weekday())
-        today = start
-
-        self._draw_header()
-        self._draw_weekdays(pos_x, pos_y + 64)
-        self._draw_days(pos_x, pos_y + 66, year, month, today, now)
-
-    def _draw_header(self):
-        # Print "July 2013" header
-        # brush = QBrush(QColor.fromRgbF(0.75, 0.75, 0.75))
-        font = QFont("Arial", 48, -1, False)
-
-        self.header = QGraphicsSimpleTextItem(self.root)
-        self.header.setFont(font)
-
-    def _draw_weekdays(self, pos_x, pos_y):
-        # cr.set_source_rgb(*self.style.foreground_color)
-        # brush = QBrush(QColor.fromRgbF(0.75, 0.75, 0.75))
-        font = QFont("Arial", 26, -1, False)
-        fm = QFontMetrics(font)
-        days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-        for x, day in enumerate(days):
-            # xbearing, ybearing, width, height, xadvance, yadvance = cr.text_extents(days[x])
-            text = QGraphicsSimpleTextItem(self.root)
-            rect = fm.boundingRect(day)
-            text.setPos(pos_x + x * self.cell_width - rect.width() / 2 + self.cell_width / 2.0,
-                        pos_y + 32 + 0 * self.cell_height)
-            text.setFont(font)
-            text.setText(day)
-            self.weekdays.append(text)
-
-        self.header_line = QGraphicsLineItem(self.root)
-
-        # cr.select_font_face(self.style.font, self.style.font_slant, self.style.font_weight)
-
-    def _draw_days(self, pos_x, pos_y, year, month, today, now):
-        brush = QBrush(QColor.fromRgbF(0.75, 0.75, 0.75))
-        font = QFont("Arial", 32, -1, False)
-
-        for y in range(0, 6):
-            for x in range(0, 7):
-                s = "%d" % today.day
-
-                if today.month != month:
-                    brush = QBrush(QColor.fromRgbF(0.75, 0.75, 0.75))
-                else:
-                    if today.day == now.day and today.month == now.month and self.calendar_offset == 0:
-                        # cr.set_source_rgb(*self.style.foreground_color)
-                        brush = QBrush(QColor.fromRgbF(1, 1, 1))
-
-                        rect = QGraphicsRectItem(self.root)
-                        rect.setBrush(brush)
-                        # cr.set_source_rgb(*self.style.background_color)
-                        brush = QBrush(QColor.fromRgbF(0, 0, 0))
-                        # cr.select_font_face(self.style.font, self.style.font_slant, self.style.font_weight)
-                    else:
-                        # cr.select_font_face(self.style.font, self.style.font_slant, self.style.font_weight)
-                        # cr.set_source_rgb(*self.style.foreground_color)
-                        brush = QBrush(QColor.fromRgbF(0, 0, 0))
-
-                fm = QFontMetrics(font)
-                width = fm.width(s)
-
-                text = QGraphicsSimpleTextItem(self.root)
-                text.setPos(pos_x + x * self.cell_width - width / 2 + self.cell_width / 2.0,
-                            pos_y + 32 + self.cell_height + y * self.cell_height)
-                text.setText(s)
-                text.setBrush(brush)
-                text.setFont(font)
-                today = today + timedelta(days=1)
-
-                self.days.append(text)
+            if day.day == now.day and day.month == now.month and self.calendar_offset == 0:
+                self.cursor_pos = (col, row)
 
 
 # EOF #
