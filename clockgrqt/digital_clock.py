@@ -71,8 +71,6 @@ class DigitalClock(Desklet):
         time = now.strftime("%H:%M")
         seconds = now.strftime("%S")
 
-        print(date, time, seconds)
-
         self.time.setText(time)
         self.seconds.setText(seconds)
         self.date.setText(date)

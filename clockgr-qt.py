@@ -86,7 +86,6 @@ class MainWindow(QMainWindow):
         self.calendar.set_style(style)
         self.calendar.update(datetime.now())
         self.scene.addItem(self.calendar.root)
-        # self.calendar.root.setPos(-400, 0)
 
         self.timer = QTimer()
         self.timer.setInterval(500)
