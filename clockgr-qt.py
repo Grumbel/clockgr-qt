@@ -42,7 +42,9 @@ class MainWindow(QMainWindow):
 
         self.graphics_view = QGraphicsView(central)
         self.graphics_view.setRenderHints(QPainter.Antialiasing | QPainter.SmoothPixmapTransform)
-        self.graphics_view.centerOn(1200/2, 900/2)
+        self.graphics_view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff);
+        self.graphics_view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff);
+        #self.graphics_view.centerOn(1200/2, 900/2)
 
         self.scene = QGraphicsScene()
 
@@ -57,6 +59,9 @@ class MainWindow(QMainWindow):
         self.show()
 
         style = Style()
+
+        self.debug_rect = self.scene.addRect(QRectF(0, 0, 1199, 899))
+        self.debug_rect.setPen(QPen(QColor(255, 0, 0)))
 
         world = self.scene.addPixmap(QPixmap("world_g.png"))
         world.setPos(1200 - 540 - 32, 900 - 276 - 32)
@@ -91,7 +96,7 @@ class MainWindow(QMainWindow):
         # self.world = self.add_desklet(WorldDesklet(),    (1200 - 540 - 32, 900 - 276 - 32, 540, 276))
         # self.stopwatch = self.add_desklet(StopWatch(),       (32, 64, 500, 180))
 
-        self.setFixedSize(1200, 900)
+        self.setMinimumSize(1200, 900)
 
     def my_update(self, *args):
         now = datetime.now()
