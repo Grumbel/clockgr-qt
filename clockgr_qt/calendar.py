@@ -106,6 +106,8 @@ class CalendarDesklet(Desklet):
         self.header_line.setLine(x, y,
                                  x + self.rect.width() - 3, y)
 
+        y += 8
+
         for n, (day, widget) in enumerate(self.days):
             col = n % 7
             row = n // 7
@@ -137,7 +139,7 @@ class CalendarDesklet(Desklet):
 
         self.header_line.setPen(style.foreground_color)
 
-        self.cursor.setBrush(style.foreground_color)
+        self.cursor.setBrush(style.midcolor)
         self.cursor.setPen(QPen(Qt.NoPen))
 
         for widget in self.weekdays:

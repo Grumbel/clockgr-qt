@@ -38,7 +38,7 @@ class DigitalClock(Desklet):
         self.date.setBrush(style.foreground_color)
 
         font = QFont(style.font)
-        font.setPixelSize(192 * 0.6)
+        font.setPixelSize(192 * 0.5)
         self.seconds.setFont(font)
 
         font = QFont(style.font)

@@ -1,8 +1,9 @@
 ClockGr
 =======
 
-clockgr is a simple fullscreen clock for Gtk+ and Qt, it includes a calendar,
-a stopwatch and both digital and analog displays.
+clockgr is a simple fullscreen clock for Gtk+ and Qt, it includes a
+calendar, a stopwatch and both digital and analog displays. The Gtk+
+version is much slower then the Qt one and considered obsolete.
 
 
 Run the Gtk version

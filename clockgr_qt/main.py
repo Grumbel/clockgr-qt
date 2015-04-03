@@ -35,6 +35,8 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
+        self.setWindowTitle("ClockGr")
+
         self.inverted = False
 
         central = QWidget()
@@ -116,6 +118,7 @@ class MainWindow(QMainWindow):
         self.calendar.set_style(style)
         self.digital_clock.set_style(style)
         self.analog_clock.set_style(style)
+        self.stop_watch.set_style(style)
 
         self.inverted = not self.inverted
 
