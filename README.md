@@ -1,8 +1,30 @@
 ClockGr
 =======
 
-clockgr is a simple fullscreen clock for Gtk+, it includes a calendar,
+clockgr is a simple fullscreen clock for Gtk+ and Qt, it includes a calendar,
 a stopwatch and both digital and analog displays.
+
+
+Run the Gtk version
+-------------------
+
+    python -m clockgr_gtk
+
+
+Run the Qt version
+------------------
+
+    python3 -m clockgr_qt
+
+
+Install
+-------
+
+    python3 setup.py install
+
+
+Screenshots
+-----------
 
 ![ClockGr Screenshot](https://raw.githubusercontent.com/Grumbel/clockgr/master/clockgr.png)
 

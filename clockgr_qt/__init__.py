@@ -14,40 +14,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-SOURCES := $(wildcard \
-  *.py \
-  clockgr_qt/*.py \
-  clockgr_gtk/*.py \
-  clockgr_gtk/desklets/*.py)
 
-default: flake test
+from clockgr_qt.main import main
 
-all: autopep flake test pylint
 
-autopep:
-	autopep8 --max-line=120 --in-place --aggressive $(SOURCES)
+__all__ = ["main"]
 
-test:
-	python2 -m unittest discover -s tests/
-
-flake:
-	python2 -m flake8.run --max-line-length=120 $(SOURCES)
-
-PYLINT_TARGETS := $(addprefix .pylint/, $(SOURCES))
-
-$(PYLINT_TARGETS): .pylint/%.py: %.py
-	mkdir -p $(dir $@)
-	PYTHONPATH=. epylint $<
-	touch $@
-
-pylint: $(PYLINT_TARGETS)
-
-clean:
-	rm -vrf .pylint/
-
-run:
-	./clockgr-qt.py
-
-.PHONY: autopep test flake pylint clean all default run
 
 # EOF #

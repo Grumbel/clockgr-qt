@@ -16,6 +16,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+from __future__ import print_function
+
 import pygtk
 from datetime import datetime
 pygtk.require('2.0')
@@ -83,7 +86,7 @@ class ClockRenderer(object):
         self.apply_mode()
 
     def next_mode(self):
-        print self.mode
+        print(self.mode)
 
         if self.mode == ClockMode.calendar:
             self.mode = ClockMode.stopwatch
@@ -146,7 +149,7 @@ class ClockRenderer(object):
 
 
 def realize_cb(widget):
-    print "realize_cb"
+    print("realize_cb")
     pixmap = gtk.gdk.Pixmap(None, 1, 1, 1)
     color = gtk.gdk.Color()
     cursor = gtk.gdk.Cursor(pixmap, pixmap, color, color, 0, 0)

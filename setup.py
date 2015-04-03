@@ -14,40 +14,25 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-SOURCES := $(wildcard \
-  *.py \
-  clockgr_qt/*.py \
-  clockgr_gtk/*.py \
-  clockgr_gtk/desklets/*.py)
 
-default: flake test
+from distutils.core import setup
 
-all: autopep flake test pylint
 
-autopep:
-	autopep8 --max-line=120 --in-place --aggressive $(SOURCES)
+setup(
+    name="clockgr",
+    version="0.1.0",
+    description="A fullscreen clock for Qt",
+    author="Ingo Ruhnke",
+    author_email="grumbel@gmail.com",
+    url="https://github.com/Grumbel/clockgr",
+    packages=["clockgr_qt", "clockgr_gtk"],
+    scripts=["bin/clockgr-qt",
+             "bin/clockgr-gtk"],
+    long_description=("clockgr is a simple fullscreen clock for"
+                      "Gtk+, it includes a calendar, a stopwatch "
+                      "and both digital and analog displays."),
+    requires=["PyQt5", "pygtk", "gtk", "gobject"]
+    )
 
-test:
-	python2 -m unittest discover -s tests/
-
-flake:
-	python2 -m flake8.run --max-line-length=120 $(SOURCES)
-
-PYLINT_TARGETS := $(addprefix .pylint/, $(SOURCES))
-
-$(PYLINT_TARGETS): .pylint/%.py: %.py
-	mkdir -p $(dir $@)
-	PYTHONPATH=. epylint $<
-	touch $@
-
-pylint: $(PYLINT_TARGETS)
-
-clean:
-	rm -vrf .pylint/
-
-run:
-	./clockgr-qt.py
-
-.PHONY: autopep test flake pylint clean all default run
 
 # EOF #

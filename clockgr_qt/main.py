@@ -154,7 +154,7 @@ class MainWindow(QMainWindow):
 def main():
     app = QApplication(sys.argv)
     window = MainWindow()
-    app._exec()
+    app.exec_()
 
     # manually tear down the app, PyQt crashes otherwise
     del window
