@@ -48,13 +48,13 @@ class DigitalClock(Desklet):
         font = QFont(style.font)
         font.setPixelSize(56)
         self.date.setFont(font)
+        self.layout()
 
     def set_rect(self, rect):
         super().set_rect(rect)
+        self.layout()
 
-        # FIXME: set_rect can't layout properly without style, neither
-        # can style without a rect
-
+    def layout(self):
         time_fm = QFontMetrics(self.time.font())
         seconds_fm = QFontMetrics(self.seconds.font())
 

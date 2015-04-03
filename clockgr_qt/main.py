@@ -70,27 +70,19 @@ class MainWindow(QMainWindow):
         self.analog_clock = AnalogClock()
         self.analog_clock.set_rect(QRectF(900 - 256, 32, 512, 512))
         self.analog_clock.set_style(style)
-        self.analog_clock.set_time(datetime.now())
         self.scene.addItem(self.analog_clock.root)
 
         self.digital_clock = DigitalClock()
         self.digital_clock.set_rect(QRectF(32, 670, 640, 200))
         self.digital_clock.set_style(style)
-        self.digital_clock.set_rect(QRectF(32, 670, 640, 200))
-        self.digital_clock.update(datetime.now())
         self.scene.addItem(self.digital_clock.root)
 
         self.calendar = CalendarDesklet()
-        self.calendar.update(datetime.now())
-        self.calendar.set_style(style)
         self.calendar.set_rect(QRectF(32, 32, 512, 412))
         self.calendar.set_style(style)
-        self.calendar.update(datetime.now())
         self.scene.addItem(self.calendar.root)
 
         self.stop_watch = StopWatch()
-        self.stop_watch.set_rect(QRectF(32, 480, 512, 120))
-        self.stop_watch.set_style(style)
         self.stop_watch.set_rect(QRectF(32, 480, 512, 120))
         self.stop_watch.set_style(style)
         self.scene.addItem(self.stop_watch.root)
@@ -100,8 +92,11 @@ class MainWindow(QMainWindow):
         self.timer.timeout.connect(self.my_update)
         self.timer.start()
 
+        self.analog_clock.update(datetime.now())
+        self.digital_clock.update(datetime.now())
+        self.calendar.update(datetime.now())
+
         # self.world = self.add_desklet(WorldDesklet(), (1200 - 540 - 32, 900 - 276 - 32, 540, 276))
-        # self.stopwatch = self.add_desklet(StopWatch(), (32, 64, 500, 180))
 
         self.setMinimumSize(1200, 900)
 
@@ -124,8 +119,9 @@ class MainWindow(QMainWindow):
 
     def my_update(self, *args):
         now = datetime.now()
-        self.analog_clock.set_time(now)
+        self.analog_clock.update(now)
         self.digital_clock.update(now)
+        self.calendar.update(now)
 
     def closeEvent(self, event):
         event.accept()

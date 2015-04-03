@@ -93,9 +93,13 @@ class AnalogClock(Desklet):
             else:
                 line.setPen(pen)
 
+        self.layout()
+
     def set_rect(self, rect):
         super().set_rect(rect)
+        self.layout()
 
+    def layout(self):
         self.center_x = self.rect.left() + self.rect.width() / 2.0
         self.center_y = self.rect.top() + self.rect.height() / 2.0
         self.radius = min(self.rect.width(), self.rect.height()) / 2.0 - 3.0
@@ -121,9 +125,9 @@ class AnalogClock(Desklet):
                              self.center_x + math.cos(angle) * self.radius * 0.95,
                              self.center_y + math.sin(angle) * self.radius * 0.95)
 
-        self.set_time(self.now)
+        self.update(self.now)
 
-    def set_time(self, now):
+    def update(self, now):
         self.now = now
 
         hour = (self.now.hour / 12.0 + self.now.minute / 60.0 / 12.0) * 2.0 * math.pi - math.pi / 2.0

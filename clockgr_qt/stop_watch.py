@@ -96,18 +96,24 @@ class StopWatch(Desklet):
         font = QFont(style.font)
         font.setPixelSize(192 / 2)
         self.time.setFont(font)
-        self.time.setBrush(self.style.foreground_color)
 
         font = QFont(style.font)
         font.setPixelSize(192 / 2 * 0.6)
         self.seconds.setFont(font)
+
+        self.label.setBrush(self.style.foreground_color)
+        self.time.setBrush(self.style.foreground_color)
         self.seconds.setBrush(self.style.foreground_color)
+
+        self.layout()
 
     def set_rect(self, rect):
         super().set_rect(rect)
+        self.layout()
 
-        x = rect.left()
-        y = rect.top()
+    def layout(self):
+        x = self.rect.left()
+        y = self.rect.top()
 
         fm = QFontMetrics(self.time.font())
         rect = fm.boundingRect("00:00")

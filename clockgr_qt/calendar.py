@@ -32,6 +32,8 @@ class CalendarDesklet(Desklet):
         self.weekdays = []
         self.days = []  # [(daytime, widget), ...]
 
+        self.now = datetime.utcfromtimestamp(0)
+
         self.header = None
         self.header_line = None
 
@@ -82,12 +84,14 @@ class CalendarDesklet(Desklet):
 
     def set_rect(self, rect):
         super().set_rect(rect)
+        self.layout()
 
+    def layout(self):
         self.cell_width = (self.rect.width()) / 7.0
         self.cell_height = (self.rect.height() - 64) / 7.0
 
-        x = rect.left()
-        y = rect.top()
+        x = self.rect.left()
+        y = self.rect.top()
 
         fm = QFontMetrics(self.header.font())
         rect = fm.boundingRect(self.header.text())
@@ -158,6 +162,8 @@ class CalendarDesklet(Desklet):
 
         for widget in self.weekdays:
             widget.setFont(font)
+
+        self.layout()
 
     def next_month(self):
         self.calendar_offset += 1

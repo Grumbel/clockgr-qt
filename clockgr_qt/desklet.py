@@ -43,5 +43,8 @@ class Desklet(object):
         if self.debug_rect:
             self.debug_rect.setRect(rect)
 
+    def layout(self):
+        pass
+
 
 # EOF #
