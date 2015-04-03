@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # clockgr - A fullscreen clock for Qt
 # Copyright (C) 2015 Ingo Ruhnke <grumbel@gmail.com>
 #
@@ -20,18 +18,16 @@
 import sys
 from datetime import datetime
 from PyQt5.Qt import Qt
-from PyQt5.QtGui import QPen, QBrush, QColor, QPainter, QPixmap
+from PyQt5.QtGui import QPen, QColor, QPainter, QPixmap
 from PyQt5.QtCore import QRectF, QTimer
 from PyQt5.QtWidgets import (QGraphicsScene, QMainWindow, QWidget,
-                             QVBoxLayout, QGraphicsView, QApplication,
-                             QGraphicsItemGroup, QGraphicsRectItem,
-                             QGraphicsEllipseItem, QGraphicsLineItem)
+                             QVBoxLayout, QGraphicsView, QApplication)
 
-from clockgrqt.analog_clock import AnalogClock
-from clockgrqt.digital_clock import DigitalClock
-from clockgrqt.calendar import CalendarDesklet
-from clockgrqt.stop_watch import StopWatch
-from clockgrqt.style import Style
+from clockgr_qt.analog_clock import AnalogClock
+from clockgr_qt.digital_clock import DigitalClock
+from clockgr_qt.calendar import CalendarDesklet
+from clockgr_qt.stop_watch import StopWatch
+from clockgr_qt.style import Style
 
 
 class MainWindow(QMainWindow):
@@ -45,9 +41,8 @@ class MainWindow(QMainWindow):
 
         self.graphics_view = QGraphicsView(central)
         self.graphics_view.setRenderHints(QPainter.Antialiasing | QPainter.SmoothPixmapTransform)
-        self.graphics_view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff);
-        self.graphics_view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff);
-        #self.graphics_view.centerOn(1200/2, 900/2)
+        self.graphics_view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.graphics_view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         self.scene = QGraphicsScene()
 
@@ -63,8 +58,9 @@ class MainWindow(QMainWindow):
 
         style = Style()
 
-        self.debug_rect = self.scene.addRect(QRectF(0, 0, 1199, 899))
-        self.debug_rect.setPen(QPen(QColor(255, 0, 0)))
+        if False:
+            self.debug_rect = self.scene.addRect(QRectF(0, 0, 1199, 899))
+            self.debug_rect.setPen(QPen(QColor(255, 0, 0)))
 
         world = self.scene.addPixmap(QPixmap("world_g.png"))
         world.setPos(1200 - 540 - 32, 900 - 276 - 32)
@@ -113,9 +109,8 @@ class MainWindow(QMainWindow):
         else:
             style = Style()
             (style.background_color,
-             style.foreground_color) = \
-             (style.foreground_color,
-              style.background_color)
+             style.foreground_color) = (style.foreground_color,
+                                        style.background_color)
 
         self.scene.setBackgroundBrush(style.background_color)
         self.calendar.set_style(style)
@@ -159,15 +154,11 @@ class MainWindow(QMainWindow):
 def main():
     app = QApplication(sys.argv)
     window = MainWindow()
-    app.exec()
+    app._exec()
 
     # manually tear down the app, PyQt crashes otherwise
     del window
     del app
-
-
-if __name__ == "__main__":
-    main()
 
 
 # EOF #

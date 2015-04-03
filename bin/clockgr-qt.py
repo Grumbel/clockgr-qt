@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # clockgr - A fullscreen clock for Qt
 # Copyright (C) 2015 Ingo Ruhnke <grumbel@gmail.com>
 #
@@ -14,40 +16,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-SOURCES := $(wildcard \
-  bin/*.py \
-  clockgr_qt/*.py \
-  clockgr_gtk/*.py \
-  clockgr_gtk/desklets/*.py)
 
-default: flake test
+import clockgr_qt
 
-all: autopep flake test pylint
 
-autopep:
-	autopep8 --max-line=120 --in-place --aggressive $(SOURCES)
+if __name__ == "__main__":
+    clockgr_qt.main()
 
-test:
-	python2 -m unittest discover -s tests/
-
-flake:
-	python2 -m flake8.run --max-line-length=120 $(SOURCES)
-
-PYLINT_TARGETS := $(addprefix .pylint/, $(SOURCES))
-
-$(PYLINT_TARGETS): .pylint/%.py: %.py
-	mkdir -p $(dir $@)
-	PYTHONPATH=. epylint $<
-	touch $@
-
-pylint: $(PYLINT_TARGETS)
-
-clean:
-	rm -vrf .pylint/
-
-run:
-	./clockgr-qt.py
-
-.PHONY: autopep test flake pylint clean all default run
 
 # EOF #

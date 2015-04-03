@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 
-import clockgr
+import clockgr_gtk
 
 if __name__ == '__main__':
-    clockgr.main()
+    clockgr_gtk.main()
 
 # EOF #
