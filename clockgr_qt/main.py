@@ -89,7 +89,7 @@ class MainWindow(QMainWindow):
 
         self.timer = QTimer()
         self.timer.setInterval(500)
-        self.timer.timeout.connect(self.my_update)
+        self.timer.timeout.connect(self.update)
         self.timer.start()
 
         self.analog_clock.update(datetime.now())
@@ -117,7 +117,7 @@ class MainWindow(QMainWindow):
 
         self.inverted = not self.inverted
 
-    def my_update(self, *args):
+    def update(self, _):
         now = datetime.now()
         self.analog_clock.update(now)
         self.digital_clock.update(now)

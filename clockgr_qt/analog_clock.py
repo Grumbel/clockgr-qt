@@ -38,7 +38,7 @@ class AnalogClock(Desklet):
         self.circle = QGraphicsEllipseItem(self.root)
 
         self.lines = []
-        for i in range(0, 60):
+        for _ in range(0, 60):
             self.lines.append(QGraphicsLineItem(self.root))
 
         self.hours_hand = QGraphicsLineItem(self.root)

@@ -16,11 +16,9 @@
 
 SOURCES := $(wildcard \
   *.py \
-  clockgr_qt/*.py \
-  clockgr_gtk/*.py \
-  clockgr_gtk/desklets/*.py)
+  clockgr_qt/*.py)
 
-default: flake test
+default: flake test pylint
 
 all: autopep flake test pylint
 
@@ -37,7 +35,7 @@ PYLINT_TARGETS := $(addprefix .pylint/, $(SOURCES))
 
 $(PYLINT_TARGETS): .pylint/%.py: %.py
 	mkdir -p $(dir $@)
-	PYTHONPATH=. epylint $<
+	PYTHONPATH=. epylint3 $< --rcfile=.pylintrc --max-line-length=120 --extension-pkg-whitelist=PyQt5
 	touch $@
 
 pylint: $(PYLINT_TARGETS)
