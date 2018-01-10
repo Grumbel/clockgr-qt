@@ -16,6 +16,8 @@
 
 
 import sys
+import signal
+
 from datetime import datetime
 from PyQt5.Qt import Qt
 from PyQt5.QtGui import QPen, QColor, QPainter, QPixmap
@@ -153,6 +155,10 @@ class MainWindow(QMainWindow):
 def main():
     app = QApplication(sys.argv)
     window = MainWindow()
+
+    # allow Ctrl-C to close the app
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+
     app.exec_()
 
     # manually tear down the app, PyQt crashes otherwise
