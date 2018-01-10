@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python2
 #
 # clockgr - A fullscreen clock for Gtk+
 # Copyright (C) 2012 Ingo Ruhnke <grumbel@gmail.com>
