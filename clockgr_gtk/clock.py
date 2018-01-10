@@ -20,18 +20,19 @@
 from __future__ import print_function
 
 import pygtk
-from datetime import datetime
 pygtk.require('2.0')
 import gtk
 import gobject
 import sys
 
-from .style import Style
-from .desklets.digital_clock import DigitalClock
-from .desklets.analog_clock import AnalogClock
-from .desklets.world import WorldDesklet
-from .desklets.calendar import CalendarDesklet
-from .desklets.stop_watch import StopWatch
+from datetime import datetime
+
+from clockgr_gtk.style import Style
+from clockgr_gtk.desklets.digital_clock import DigitalClock
+from clockgr_gtk.desklets.analog_clock import AnalogClock
+from clockgr_gtk.desklets.world import WorldDesklet
+from clockgr_gtk.desklets.calendar import CalendarDesklet
+from clockgr_gtk.desklets.stop_watch import StopWatch
 
 
 def is_olpc():

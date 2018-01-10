@@ -1,4 +1,4 @@
-from style import Style
+from clockgr_gtk.style import Style
 
 
 class Desklet(object):
