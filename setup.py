@@ -25,18 +25,17 @@ setup(
     author="Ingo Ruhnke",
     author_email="grumbel@gmail.com",
     url="https://github.com/Grumbel/clockgr",
-    packages=["clockgr_qt", "clockgr_gtk"],
+    packages=["clockgr_qt"],
     entry_points={
         'console_scripts': [],
         'gui_scripts': [
-            'clockgr-qt = clockgr_qt.main:main_entrypoint',
-            'clockgr-gtk = clockgr_gtk.clock:main_entrypoint'
+            'clockgr-qt = clockgr_qt.main:main_entrypoint'
         ]
     },
     long_description=("clockgr is a simple fullscreen clock for"
-                      "Gtk+, it includes a calendar, a stopwatch "
+                      "Qt, it includes a calendar, a stopwatch "
                       "and both digital and analog displays."),
-    requires=["PyQt5", "pygtk", "gtk", "gobject"]
+    requires=["PyQt5"]
 )
 
 
