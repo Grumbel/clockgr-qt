@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from datetime import datetime, timedelta
+from datetime import timedelta, date
 from PyQt5.Qt import Qt
 from PyQt5.QtGui import QPen, QFont, QFontMetrics
 from PyQt5.QtWidgets import (QGraphicsRectItem, QGraphicsLineItem,
@@ -23,112 +23,77 @@ from PyQt5.QtWidgets import (QGraphicsRectItem, QGraphicsLineItem,
 from .desklet import Desklet
 
 
+class CalendarModel:
+
+    def __init__(self, year=None, month=None, today=None):
+
+        if today is None:
+            self.today = date.today()
+        else:
+            self.today = today
+
+        if year is None:
+            self.year = self.today.year
+        else:
+            self.year = year
+
+        if month is None:
+            self.month = self.today.month
+        else:
+            self.month = month
+
+    def update(self, now):
+        self.today = now.date()
+
+    def next_month(self):
+        self.month += 1
+
+        while self.month > 12:
+            self.year += 1
+            self.month -= 12
+
+    def previous_month(self):
+        self.month -= 1
+
+        while self.month < 1:
+            self.year -= 1
+            self.month += 12
+
+
 class CalendarDesklet(Desklet):
 
     def __init__(self):
         super().__init__()
 
-        self.calendar_offset = 0
-        self.weekdays = []
-        self.days = []  # [(daytime, widget), ...]
-
-        self.now = datetime.utcfromtimestamp(0)
-
-        self.header = None
-        self.header_line = None
-
-        self.cursor = None
+        self.model = CalendarModel()
 
         self.cursor_pos = None
-        self.build_scene(datetime.now())
 
-    def build_scene(self, now):
-        year = now.year
-        month = now.month
-        month += self.calendar_offset
-
-        while month < 1:
-            year -= 1
-            month += 12
-
-        while month > 12:
-            year += 1
-            month -= 12
-
-        # Print calendar
-        start = datetime(year, month, 1)
-        start = start - timedelta(start.weekday())
-        today = start
-
-        # cursor
         self.cursor = QGraphicsRectItem(self.root)
-
-        # header
         self.header = QGraphicsSimpleTextItem(self.root)
 
-        # weekdays
+        self.weekdays = []
         days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
         for day in days:
-            text = QGraphicsSimpleTextItem(self.root)
-            text.setText(day)
-            self.weekdays.append(text)
+            self.weekdays.append(QGraphicsSimpleTextItem(day, self.root))
 
-        # line
         self.header_line = QGraphicsLineItem(self.root)
 
-        for y in range(0, 6):
-            for x in range(0, 7):
-                widget = QGraphicsSimpleTextItem("%d" % today.day, self.root)
-                self.days.append((today, widget))
-                today = today + timedelta(days=1)
+        self.days = []
+        for _ in range(0, 6 * 7):
+            self.days.append(QGraphicsSimpleTextItem(self.root))
+
+    def next_month(self):
+        self.model.next_month()
+        self.layout()
+
+    def previous_month(self):
+        self.model.previous_month()
+        self.layout()
 
     def set_rect(self, rect):
         super().set_rect(rect)
         self.layout()
-
-    def layout(self):
-        self.cell_width = (self.rect.width()) / 7.0
-        self.cell_height = (self.rect.height() - 64) / 7.0
-
-        x = self.rect.left()
-        y = self.rect.top()
-
-        fm = QFontMetrics(self.header.font())
-        rect = fm.boundingRect(self.header.text())
-        self.header.setPos(x + self.rect.width() / 2 - rect.width() / 2,
-                           y)
-
-        y += fm.height()
-
-        for row, day in enumerate(self.weekdays):
-            fm = QFontMetrics(day.font())
-            rect = fm.boundingRect(day.text())
-            day.setPos(x + row * self.cell_width + self.cell_width / 2 - rect.width() / 2,
-                       y)
-
-        y += fm.height()
-        self.header_line.setLine(x, y,
-                                 x + self.rect.width() - 3, y)
-
-        y += 8
-
-        for n, (day, widget) in enumerate(self.days):
-            col = n % 7
-            row = n // 7
-
-            rect = fm.boundingRect(widget.text())
-            widget.setPos(x + col * self.cell_width + self.cell_width / 2 - rect.width() / 2,
-                          y + row * self.cell_height + self.cell_height / 2 - fm.height() / 2)
-
-        # FIXME: mark current day
-        if self.cursor_pos is not None:
-            self.cursor.setRect(x + self.cursor_pos[0] * self.cell_width,
-                                y + self.cursor_pos[1] * self.cell_height,
-                                self.cell_width,
-                                self.cell_height)
-            self.cursor.show()
-        else:
-            self.cursor.hide()
 
     def set_style(self, style):
         super().set_style(style)
@@ -147,73 +112,86 @@ class CalendarDesklet(Desklet):
         self.cursor.setPen(QPen(Qt.NoPen))
 
         for widget in self.weekdays:
+            widget.setFont(font)
             widget.setBrush(style.foreground_color)
 
-        for n, (day, widget) in enumerate(self.days):
-            col = n % 7
-            row = n // 7
+        for widget in self.days:
             widget.setFont(font)
-            if (col, row) == self.cursor_pos:
-                widget.setBrush(style.background_color)
-            elif day.month != self.now.month:  # FIXME: doesn't take offset into account
-                widget.setBrush(style.midcolor)
-            else:
-                widget.setBrush(style.foreground_color)
-
-        for widget in self.weekdays:
-            widget.setFont(font)
+            widget.setBrush(self.style.foreground_color)
 
         self.layout()
 
-    def next_month(self):
-        self.calendar_offset += 1
-        self.update(datetime.now())
+    def layout(self):
+        cell_width = (self.rect.width()) / 7.0
+        cell_height = (self.rect.height() - 64) / 7.0
 
-    def previous_month(self):
-        self.calendar_offset -= 1
-        self.update(datetime.now())
+        x = self.rect.left()
+        y = self.rect.top()
 
-    def update(self, now):
-        self.now = now
+        fm = QFontMetrics(self.header.font())
+        rect = fm.boundingRect(self.header.text())
+        self.header.setPos(x + self.rect.width() / 2 - rect.width() / 2,
+                           y)
 
-        year = now.year
-        month = now.month
-        month += self.calendar_offset
+        y += fm.height()
 
-        while month < 1:
-            year -= 1
-            month += 12
+        for row, day in enumerate(self.weekdays):
+            fm = QFontMetrics(day.font())
+            rect = fm.boundingRect(day.text())
+            day.setPos(x + row * cell_width + cell_width / 2 - rect.width() / 2,
+                       y)
 
-        while month > 12:
-            year += 1
-            month -= 12
+        y += fm.height()
+        self.header_line.setLine(x, y,
+                                 x + self.rect.width() - 3, y)
 
-        # update header
-        s = datetime(year, month, 1).strftime("%B %Y")
+        y += 8
 
-        self.header.setText(s)
-
-        # Print calendar
-        start = datetime(year, month, 1)
-        start = start - timedelta(start.weekday())
-        today = start
-
-        self.cursor_pos = None
-
-        # update days
-        for n, (day, widget) in enumerate(self.days):
+        for n, widget in enumerate(self.days):
             col = n % 7
             row = n // 7
 
-            if day.day == now.day and day.month == now.month and self.calendar_offset == 0:
+            rect = fm.boundingRect(widget.text())
+            widget.setPos(x + col * cell_width + cell_width / 2 - rect.width() / 2,
+                          y + row * cell_height + cell_height / 2 - fm.height() / 2)
+
+            # if day.month != self.now.month:
+            #    widget.setBrush(self.style.midcolor)
+            # else:
+
+        if self.cursor_pos is not None:
+            self.cursor.setRect(x + self.cursor_pos[0] * cell_width,
+                                y + self.cursor_pos[1] * cell_height,
+                                cell_width,
+                                cell_height)
+            self.cursor.show()
+        else:
+            self.cursor.hide()
+
+    def update(self, now):
+        self.model.update(now)
+
+        # update header
+        self.header.setText(
+            date(self.model.year, self.model.month, 1).strftime("%B %Y"))
+
+        # calculate the date of the top/left calendar entry
+        current_date = date(self.model.year, self.model.month, 1)
+        current_date = current_date - timedelta(current_date.weekday())
+
+        self.cursor_pos = None
+        for n, widget in enumerate(self.days):
+            col = n % 7
+            row = n // 7
+
+            if current_date == self.model.today:
                 self.cursor_pos = (col, row)
 
-            widget.setText("%d" % today.day)
-            self.days[n] = (today, widget)
-            today = today + timedelta(days=1)
+            widget.setText("%d" % current_date.day)
+            self.days[n] = widget
+            current_date += timedelta(days=1)
 
-        self.set_style(self.style)
-        self.set_rect(self.rect)
+        self.layout()
 
 
 # EOF #
