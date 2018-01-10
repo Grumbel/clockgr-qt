@@ -58,7 +58,6 @@ class MainWindow(QMainWindow):
         central.setLayout(layout)
 
         self.setCentralWidget(central)
-        self.show()
 
         style = Style()
 
@@ -159,6 +158,7 @@ def main_entrypoint():
     # allow Ctrl-C to close the app
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
+    window.show()
     app.exec_()
 
     # manually tear down the app, PyQt crashes otherwise

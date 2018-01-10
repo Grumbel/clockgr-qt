@@ -19,7 +19,7 @@ import clockgr_qt
 
 
 if __name__ == "__main__":
-    clockgr_qt.main()
+    clockgr_qt.main_entrypoint()
 
 
 # EOF #
