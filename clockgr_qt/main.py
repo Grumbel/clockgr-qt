@@ -119,7 +119,7 @@ class MainWindow(QMainWindow):
 
         self.inverted = not self.inverted
 
-    def update(self, _):
+    def update(self):
         now = datetime.now()
         self.analog_clock.update(now)
         self.digital_clock.update(now)

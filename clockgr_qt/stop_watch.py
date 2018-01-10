@@ -126,7 +126,7 @@ class StopWatch(Desklet):
 
         self.label.setPos(x, y)
 
-    def my_update(self, _):
+    def my_update(self):
         self.update()
 
     def is_running(self):
