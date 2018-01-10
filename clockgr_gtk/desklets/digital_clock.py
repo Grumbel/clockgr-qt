@@ -1,4 +1,4 @@
-from ..desklet import Desklet
+from clockgr_gtk.desklet import Desklet
 
 
 class DigitalClock(Desklet):

@@ -1,7 +1,7 @@
 import gobject
 from datetime import datetime, timedelta
 
-from ..desklet import Desklet
+from clockgr_gtk.desklet import Desklet
 
 
 class Timer(object):
