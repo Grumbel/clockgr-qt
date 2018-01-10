@@ -26,11 +26,11 @@ setup(
     author_email="grumbel@gmail.com",
     url="https://github.com/Grumbel/clockgr",
     packages=["clockgr_qt", "clockgr_gtk"],
-    scripts=["bin/clockgr-gtk"],
     entry_points={
         'console_scripts': [],
         'gui_scripts': [
             'clockgr-qt = clockgr_qt.main:main_entrypoint',
+            'clockgr-gtk = clockgr_gtk.clock:main_entrypoint'
         ]
     },
     long_description=("clockgr is a simple fullscreen clock for"

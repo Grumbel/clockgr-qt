@@ -24,6 +24,7 @@ from datetime import datetime
 pygtk.require('2.0')
 import gtk
 import gobject
+import sys
 
 from .style import Style
 from .desklets.digital_clock import DigitalClock
@@ -236,5 +237,10 @@ def main(argv):
         gobject.timeout_add(1000, renderer.update)
 
     gtk.main()
+
+
+def main_entrypoint():
+    main(sys.argv)
+
 
 # EOF #
