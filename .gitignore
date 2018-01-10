@@ -2,3 +2,4 @@
 *.pyc
 /.pylint/
 /build/
+/clockgr.egg-info/
