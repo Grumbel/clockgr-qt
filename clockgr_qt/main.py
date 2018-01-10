@@ -152,7 +152,7 @@ class MainWindow(QMainWindow):
             pass
 
 
-def main():
+def main_entrypoint():
     app = QApplication(sys.argv)
     window = MainWindow()
 

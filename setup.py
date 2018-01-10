@@ -1,5 +1,5 @@
 # clockgr - A fullscreen clock for Qt
-# Copyright (C) 2015 Ingo Ruhnke <grumbel@gmail.com>
+# Copyright (C) 2015-2018 Ingo Ruhnke <grumbel@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -26,13 +26,18 @@ setup(
     author_email="grumbel@gmail.com",
     url="https://github.com/Grumbel/clockgr",
     packages=["clockgr_qt", "clockgr_gtk"],
-    scripts=["bin/clockgr-qt",
-             "bin/clockgr-gtk"],
+    scripts=["bin/clockgr-gtk"],
+    entry_points={
+        'console_scripts': [],
+        'gui_scripts': [
+            'clockgr-qt = clockgr_qt.main:main_entrypoint',
+        ]
+    },
     long_description=("clockgr is a simple fullscreen clock for"
                       "Gtk+, it includes a calendar, a stopwatch "
                       "and both digital and analog displays."),
     requires=["PyQt5", "pygtk", "gtk", "gobject"]
-    )
+)
 
 
 # EOF #

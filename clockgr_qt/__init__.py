@@ -15,10 +15,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-from clockgr_qt.main import main
+from clockgr_qt.main import main_entrypoint
 
 
-__all__ = ["main"]
+__all__ = ["main_entrypoint"]
 
 
 # EOF #
