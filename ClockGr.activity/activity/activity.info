@@ -1,9 +1,0 @@
-[Activity]
-name = ClockGr
-activity_version = 1
-bundle_id = org.seul.pingus.ClockGr
-exec = sugar-activity clockgr.ClockGrActivity
-icon = activity-clockgr
-mime_types =
-license = GPLv3+
-summary = A simple clock and stop watch
