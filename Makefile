@@ -18,7 +18,7 @@ SOURCES := $(wildcard \
   *.py \
   clockgr_qt/*.py)
 
-default: flake test pylint
+default: mypy flake test pylint
 
 all: autopep flake test pylint
 
@@ -28,8 +28,11 @@ autopep:
 test:
 	python2 -m unittest discover -s tests/
 
+mypy:
+	mypy --ignore-missing-imports $(SOURCES)
+
 flake:
-	python2 -m flake8.run --max-line-length=120 $(SOURCES)
+	flake8 --ignore=N802 --max-line-length=120 $(SOURCES)
 
 PYLINT_TARGETS := $(addprefix .pylint/, $(SOURCES))
 
@@ -46,6 +49,6 @@ clean:
 run:
 	python3 -m clockgr_qt
 
-.PHONY: autopep test flake pylint clean all default run
+.PHONY: autopep test mypy flake pylint clean all default run
 
 # EOF #

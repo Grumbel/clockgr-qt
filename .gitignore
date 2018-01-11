@@ -3,3 +3,4 @@
 /.pylint/
 /build/
 /clockgr.egg-info/
+/.mypy_cache/
